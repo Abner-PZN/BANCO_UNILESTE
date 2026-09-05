@@ -1,18 +1,18 @@
 # 1. Caracterização da Organização 
 
-## Nome e natureza da organização:
+- **Nome e natureza da organização:**
 A organização escolhida é a Unileste Comércio LTDA., empresa de pequeno porte do setor de cosméticos e produtos capilares. A empresa atua com duas marcas comerciais — Tutti Capelli e Outlet Hair — que representam linhas distintas de produtos e pontos de venda, mas estão sob a mesma gestão administrativa e jurídica.
 
-## Contexto e porte: 
+- **Contexto e porte:** 
 A empresa possui fins lucrativos e conta atualmente com 9 funcionários diretos e cerca de 90 distribuidores que revendem seus produtos para salões de cabeleireiro. Os produtos são terceirizados — produzidos por fábricas parceiras — e comercializados exclusivamente para distribuidores, que fazem a revenda final.
 
-## Problemas e necessidades identificados:
+- **Problemas e necessidades identificados:**
 Foram identificadas dificuldades no controle das fichas de pagamento dos clientes, além da ausência de um sistema eficiente para monitorar o estoque, especialmente em relação à validade dos produtos e à quantidade disponível.
 
-## Justificativa da escolha:
+- **Justificativa da escolha:**
 A Unileste Comércio LTDA. está consolidada há mais de 20 anos no mercado, demonstrando solidez, experiência e capacidade de adaptação às mudanças do setor. Além disso, a empresa se destaca pelo desenvolvimento de metodologias inovadoras e produtos exclusivos, o que reforça sua relevância como caso de estudo para este projeto.
 
-## Evidências da organização:
+- **Evidências da organização:**
 O grupo possui evidências concretas de acesso à organização, incluindo endereço, contatos e registros fotográficos da visita, que comprovam a existência e a participação direta no levantamento de requisitos.
 
 ---
@@ -21,55 +21,65 @@ O grupo possui evidências concretas de acesso à organização, incluindo ender
 
 ## Principais processos mapeados: 
 
-Cadastro de distribuidores: registro de novos parceiros que revendem os produtos da empresa.
+- **Cadastro de distribuidores:** registro de novos parceiros que revendem os produtos da empresa.
 
-Controle de estoque: monitoramento da quantidade de produtos disponíveis e das datas de validade.
+- **Controle de estoque:** monitoramento da quantidade de produtos disponíveis e das datas de validade.
 
-Emissão de pedidos: geração de pedidos de compra pelos distribuidores, com conferência de disponibilidade em estoque.
+- **Emissão de pedidos:** geração de pedidos de compra pelos distribuidores, com conferência de disponibilidade em estoque.
 
-Controle de pagamentos: acompanhamento das fichas de pagamento dos distribuidores/clientes, garantindo que os registros estejam atualizados.
+- **Controle de pagamentos:** acompanhamento das fichas de pagamento dos distribuidores/clientes, garantindo que os registros estejam atualizados.
 
-Entregas: organização da logística de envio dos produtos aos distribuidores.
+- **Entregas:** organização da logística de envio dos produtos aos distribuidores.
 
-Processo de compras: aquisição de produtos junto às fábricas terceirizadas, garantindo o abastecimento contínuo do estoque.
+- **Processo de compras:** aquisição de produtos junto às fábricas terceirizadas, garantindo o abastecimento contínuo do estoque.
 
-Fluxogramas:  
-Os fluxogramas dos processos-chave (cadastro de distribuidores, controle de estoque, emissão de pedidos e entregas) serão anexados em formato de imagem ao repositório. Eles demonstram o fluxo de cada processo e como se integram entre si, evidenciando a relação entre compras, estoque, pedidos e pagamentos.
+## Fluxograma:  
+
+O fluxograma abaixo representa os processos integrados da Unileste Comércio LTDA., incluindo cadastro de distribuidores, pedidos, pagamentos, compras, controle de estoque, logística, entrega e atualização de relatórios.
+
+![Fluxograma Geral](Docs/Fluxograma.png)
+
+**Legenda:**
+- 🔵 Azul = Processo
+- 🔷 Rosa = Decisão
+- ➡️ Setas = Fluxo de execução
 
 ---
 
 # 3. Requisitos do Sistema
 
+
 ## 3.1 Requisitos Funcionais
-O sistema deve permitir realizar novos cadastros de distribuidores.
 
-O sistema deve possibilitar o controle de estoque, incluindo quantidade e validade dos produtos.
+- O sistema deve permitir realizar novos cadastros de distribuidores.
 
-O sistema deve emitir relatórios de validade dos produtos em estoque.
+- O sistema deve possibilitar o controle de estoque, incluindo quantidade e validade dos produtos.
 
-O sistema deve permitir o controle de pagamentos dos distribuidores/clientes.
+- O sistema deve emitir relatórios de validade dos produtos em estoque.
 
-O sistema deve possibilitar a geração de pedidos de compra.
+- O sistema deve permitir o controle de pagamentos dos distribuidores/clientes.
 
-O sistema deve registrar entradas e saídas de notas fiscais.
+- O sistema deve possibilitar a geração de pedidos de compra.
+
+- O sistema deve registrar entradas e saídas de notas fiscais.
 
 ## 3.2 Requisitos Não Funcionais
 
-Segurança: garantir a proteção dos dados dos distribuidores e das transações financeiras.
+- **Segurança:** garantir a proteção dos dados dos distribuidores e das transações financeiras.
 
-Usabilidade: interface simples e intuitiva para facilitar o uso por funcionários e administradores.
+- **Usabilidade:** interface simples e intuitiva para facilitar o uso por funcionários e administradores.
 
-Desempenho: respostas rápidas às consultas de estoque e relatórios.
+- **Desempenho:** respostas rápidas às consultas de estoque e relatórios.
 
-Disponibilidade: sistema acessível em tempo integral, evitando interrupções nas operações.
+- **Disponibilidade:** sistema acessível em tempo integral, evitando interrupções nas operações.
 
-Escalabilidade: capacidade de expansão para suportar aumento no número de distribuidores e produtos.
+- **Escalabilidade:** capacidade de expansão para suportar aumento no número de distribuidores e produtos.
 
 ---
 
 # 4. Regras de Negócio
 
-## Regras operacionais:
+- **Regras operacionais:**
 
 O sistema deve emitir aviso quando o estoque de um produto estiver esgotado ou prestes a se esgotar.
 
@@ -77,7 +87,7 @@ Para que uma nota fiscal seja gerada, é obrigatório que todos os dados estejam
 
 Um pedido só pode ser liberado mediante pagamento ou mediante acordo formal com o gerente financeiro para pagamento futuro.
 
-## Restrições organizacionais:
+- **Restrições organizacionais:**
 
 A liberação de pedidos está condicionada às políticas internas de pagamento, que exigem quitação imediata ou autorização do gerente financeiro.
 
@@ -211,6 +221,8 @@ Estoque não pode ter quantidade negativa | Atributo Quantidade deve ter restri�
 
 ## Entidades e Relacionamentos
 
+Nota: O arquivo de imagem do DER está anexado separadamente na pasta raiz deste repositório.
+
 Entidade        | Relacionamento                          | Cardinalidade
 ----------------|-----------------------------------------|--------------------------------------------
 Distribuidor    | Realiza Pedido                          | 1 Distribuidor pode realizar N Pedidos
@@ -265,6 +277,15 @@ Tratar Relatório como atributo   | Rejeitado porque relatórios consolidam múl
 Permitir pedidos sem pagamento   | Rejeitado porque não reflete a política interna da empresa e comprometeria a integridade financeira.
 Ignorar validade dos produtos    | Rejeitado porque a validade é crítica no setor de cosméticos e impacta diretamente a conformidade legal e a qualidade.
 
+## Justificativa do DER
+
+O Diagrama Entidade-Relacionamento (DER) foi elaborado para representar de forma estruturada os principais processos da Unileste Comércio LTDA. As entidades escolhidas — Distribuidor, Pedido, Produto, Pagamento, Nota Fiscal, Compra, Estoque e Entrega — refletem diretamente as operações observadas na empresa.
+
+Os relacionamentos definidos garantem integridade e consistência dos dados: distribuidores realizam pedidos, cada pedido gera nota fiscal, pagamento e entrega, enquanto as compras abastecem o estoque e os produtos são controlados por validade e quantidade.
+
+Esse modelo evita redundâncias, facilita consultas e assegura que todas as etapas do fluxo de negócio estejam corretamente representadas, servindo como base sólida para o desenvolvimento de um sistema de informação confiável e eficiente.
+
+
 ## Conclusão
 
 O modelo conceitual foi estruturado para refletir fielmente os processos da Unileste Comércio LTDA., garantindo integridade dos dados, conformidade legal e suporte às operações reais da empresa. As entidades, atributos, relacionamentos e cardinalidades escolhidos permitem escalabilidade e integração futura, atendendo tanto às necessidades atuais quanto à evolução do sistema.
@@ -283,25 +304,5 @@ Trechos rejeitados ou corrigidos | Ajustes manuais foram feitos para adequar ter
 Justificativa da escolha final | O grupo manteve as sugestões da IA porque estavam alinhadas ao modelo exigido e facilitaram a padronização do documento.
 Reflexão crítica             | O uso da IA trouxe agilidade e organização, mas exigiu revisão crítica para evitar generalizações e garantir que os dados refletissem fielmente a empresa estudada.
 
----
 
-# Justificativa do DER
 
-O Diagrama Entidade-Relacionamento (DER) foi elaborado para representar de forma estruturada os principais processos da Unileste Comércio LTDA. As entidades escolhidas — Distribuidor, Pedido, Produto, Pagamento, Nota Fiscal, Compra, Estoque e Entrega — refletem diretamente as operações observadas na empresa.
-
-Os relacionamentos definidos garantem integridade e consistência dos dados: distribuidores realizam pedidos, cada pedido gera nota fiscal, pagamento e entrega, enquanto as compras abastecem o estoque e os produtos são controlados por validade e quantidade.
-
-Esse modelo evita redundâncias, facilita consultas e assegura que todas as etapas do fluxo de negócio estejam corretamente representadas, servindo como base sólida para o desenvolvimento de um sistema de informação confiável e eficiente.
-
----
-
-## Fluxograma Geral
-
-O fluxograma abaixo representa os processos integrados da Unileste Comércio LTDA., incluindo cadastro de distribuidores, pedidos, pagamentos, compras, controle de estoque, logística, entrega e atualização de relatórios.
-
-![Fluxograma Geral](Docs/Fluxograma.png)
-
-**Legenda:**
-- 🔵 Azul = Processo
-- 🔷 Rosa = Decisão
-- ➡️ Setas = Fluxo de execução
