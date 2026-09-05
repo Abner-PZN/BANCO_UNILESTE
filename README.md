@@ -155,7 +155,7 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 | ID_Estoque | Identificador único do estoque | Obrigatório |
 | ID_Produto | Produto armazenado | Obrigatório, chave estrangeira |
 | Quantidade | Quantidade disponível | Não pode ser negativa |
-| Local | Local de armazenamento | Opcional |
+| Validade | Data de validade do produto | Permite controlar produtos próximos do vencimento |
 
 ## Entidade: Compra
 
@@ -165,7 +165,6 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 | Data | Data da compra | Obrigatório |
 | Fornecedor | Fábrica terceirizada | Obrigatório |
 | Valor | Valor da compra | Deve ser positivo |
-| ID_Produto | Produto adquirido | Obrigatório, chave estrangeira |
 
 --- 
 
@@ -182,18 +181,10 @@ Nota Fiscal     | Documento fiscal obrigatório que valida cada transação
 Pagamento       | Registra a quitação financeira dos pedidos
 Estoque         | Controla a quantidade e validade dos produtos disponíveis
 Compra          | Representa a aquisição de produtos junto às fábricas terceirizadas
-Relatório       | Consolida informações gerenciais (estoque, vendas, pagamentos)
 
 ## Atributos e classificações
 
-(complementam o dicionário da Seção 5)
-Atributo        | Classificação
-----------------|-----------------------------------
-ID_Distribuidor | Chave primária
-Nome            | Obrigatório
-CNPJ            | Obrigatório, único
-Endereço        | Obrigatório
-Telefone        | Opcional
+Os atributos e suas respectivas classificações estão detalhados no Dicionário de Dados Conceitual (Seção 5), que apresenta os atributos de cada entidade, suas descrições e as regras de negócio associadas.
 
 ## Relacionamentos pertinentes
 
@@ -202,10 +193,8 @@ Relacionamento                  | Descrição
 Distribuidor -> Pedido          | Um distribuidor pode realizar vários pedidos
 Pedido -> Nota Fiscal           | Cada pedido gera uma nota fiscal correspondente
 Pedido -> Pagamento             | Um pedido pode ter um ou mais pagamentos associados
-Produto -> Estoque              | Cada produto é controlado em estoque (quantidade e validade)
-Compra -> Produto               | Cada compra abastece o estoque com produtos adquiridos
-Venda -> Produto                | Cada venda retira produtos do estoque
-Relatório -> (Pedidos, Estoque, Pagamentos) | Relatórios consolidados são gerados a partir dessas entidades
+Compra -> Estoque               | Cada compra pode abastecer o estoque com os produtos adquiridos
+Estoque -> Produto              | Um estoque pode conter vários produtos, e cada produto pertence a um único estoque.
 
 ## Restrições e políticas organizacionais aplicadas ao modelo
 
@@ -216,6 +205,7 @@ Nota Fiscal só pode ser emitida com produto em estoque | Relacionamento Pedido-
 Produtos não podem ser vendidos após a validade | Atributo Validade do Produto deve ser controlado
 Estoque não pode ter quantidade negativa | Atributo Quantidade deve ter restrição >= 0
 
+---
 
 # 7. Diagrama Entidade-Relacionamento (DER)
 
@@ -228,12 +218,9 @@ Entidade        | Relacionamento                          | Cardinalidade
 Distribuidor    | Realiza Pedido                          | 1 Distribuidor pode realizar N Pedidos
 Pedido          | Gera Nota Fiscal                        | 1 Pedido gera 1 Nota Fiscal
 Pedido          | Possui Pagamento                        | 1 Pedido pode ter N Pagamentos
-Produto         | Controlado em Estoque                   | 1 Produto pode estar em N Estoques
-Compra          | Abastece Produto                        | 1 Compra pode incluir N Produtos
-Revenda         | Retira Produto do Estoque               | 1 Revenda pode incluir N Produtos
-Revenda         | Associada a Distribuidor                | 1 Distribuidor pode ter N Revendas
+Estoque         | Contém Produtos                         | 1 Estoque pode conter N Produtos
+Compra          | Abastece estoque                        | N:M
 Nota Fiscal     | Vinculada a Pedido                      | 1 Nota Fiscal corresponde a 1 Pedido
-Relatório       | Consolida dados de Pedido, Estoque, Pagamento | Relatório depende de múltiplas entidades
 
 ## Cardinalidades principais
 
@@ -243,16 +230,13 @@ Pedido – Nota Fiscal: 1:1 (cada pedido gera uma nota fiscal única).
 
 Pedido – Pagamento: 1:N (um pedido pode ter vários pagamentos).
 
-Produto – Estoque: 1:N (um produto pode estar em diferentes locais de estoque).
+Compra – Estoque: N:M (uma compra pode estar relacionada ao estoque, e o estoque pode receber produtos provenientes de diferentes compras).
 
-Compra – Produto: N:N (uma compra pode incluir vários produtos e um produto pode ser adquirido em várias compras).
+Estoque – Produto: 1:N (um estoque pode armazenar vários produtos, enquanto cada produto pertence a um único estoque).
 
-Revenda – Produto: N:N (uma revenda pode incluir vários produtos e um produto pode ser revendido várias vezes).
+Estoque – Compra: 1:N (um estoque pode receber produtos provenientes de várias compras, enquanto cada compra abastece um único estoque).
 
-Revenda – Distribuidor: 1:N (um distribuidor pode realizar várias revendas).
-
-Relatório – Entidades: Relatório consolida dados de várias entidades (Pedido, Estoque, Pagamento).
-
+---
 
 # 8. Justificativa Técnica
 
@@ -260,11 +244,11 @@ Relatório – Entidades: Relatório consolida dados de várias entidades (Pedid
 
 Decisão                         | Justificativa
 --------------------------------|------------------------------------------------------------
-Escolha das entidades           | Foram selecionadas entidades que representam os principais elementos operacionais da empresa: Distribuidor, Produto, Pedido, Nota Fiscal, Pagamento, Estoque, Compra, Revenda e Relatório. Cada uma reflete processos reais observados.
+Escolha das entidades           | Foram selecionadas entidades que representam os principais elementos operacionais da empresa: Distribuidor, Produto, Pedido, Nota Fiscal, Pagamento, Estoque e Compra. Cada uma reflete processos reais observados.
 Atributos obrigatórios          | Definidos para garantir integridade dos dados (ex.: ID único, CNPJ válido, quantidade >= 0, validade futura). Isso assegura consistência e evita erros operacionais.
 Relacionamentos 1:N             | Distribuidor-Pedido e Pedido-Pagamento foram modelados como 1:N porque um distribuidor pode gerar vários pedidos e um pedido pode ter múltiplos pagamentos.
 Relacionamentos 1:1             | Pedido-Nota Fiscal foi definido como 1:1, pois cada pedido gera uma nota fiscal única, conforme exigência legal.
-Relacionamentos N:N             | Compra-Produto e Revenda-Produto foram modelados como N:N porque uma compra pode incluir vários produtos e um produto pode ser adquirido ou revendido diversas vezes.
+Relacionamentos N:N             | Compra-Estoque foi modelado como N:M, pois uma compra pode abastecer diferentes registros de estoque e um registro de estoque pode ser abastecido por diferentes compras.
 Cardinalidades                  | Foram aplicadas para refletir a realidade operacional: controle de estoque, múltiplos pedidos por distribuidor, restrição de validade dos produtos e obrigatoriedade de pagamento para liberação de pedidos.
 Restrições organizacionais      | Incorporadas ao modelo para atender exigências legais (nota fiscal obrigatória, validade de produtos) e políticas internas (liberação de pedidos mediante pagamento ou acordo).
 
@@ -272,14 +256,12 @@ Restrições organizacionais      | Incorporadas ao modelo para atender exigênc
 
 Alternativa                      | Motivo da rejeição
 ---------------------------------|------------------------------------------------------------
-Unificar Compra e Revenda        | Rejeitado porque são processos distintos: compra abastece estoque, revenda retira estoque.
-Tratar Relatório como atributo   | Rejeitado porque relatórios consolidam múltiplas entidades e precisam ser modelados como entidade própria para flexibilidade.
 Permitir pedidos sem pagamento   | Rejeitado porque não reflete a política interna da empresa e comprometeria a integridade financeira.
 Ignorar validade dos produtos    | Rejeitado porque a validade é crítica no setor de cosméticos e impacta diretamente a conformidade legal e a qualidade.
 
 ## Justificativa do DER
 
-O Diagrama Entidade-Relacionamento (DER) foi elaborado para representar de forma estruturada os principais processos da Unileste Comércio LTDA. As entidades escolhidas — Distribuidor, Pedido, Produto, Pagamento, Nota Fiscal, Compra, Estoque e Entrega — refletem diretamente as operações observadas na empresa.
+O Diagrama Entidade-Relacionamento (DER) foi elaborado para representar de forma estruturada os principais processos da Unileste Comércio LTDA. As entidades escolhidas — Distribuidor, Pedido, Produto, Pagamento, Nota Fiscal, Compra e Estoque — refletem diretamente as operações observadas na empresa.
 
 Os relacionamentos definidos garantem integridade e consistência dos dados: distribuidores realizam pedidos, cada pedido gera nota fiscal, pagamento e entrega, enquanto as compras abastecem o estoque e os produtos são controlados por validade e quantidade.
 
@@ -290,6 +272,7 @@ Esse modelo evita redundâncias, facilita consultas e assegura que todas as etap
 
 O modelo conceitual foi estruturado para refletir fielmente os processos da Unileste Comércio LTDA., garantindo integridade dos dados, conformidade legal e suporte às operações reais da empresa. As entidades, atributos, relacionamentos e cardinalidades escolhidos permitem escalabilidade e integração futura, atendendo tanto às necessidades atuais quanto à evolução do sistema.
 
+---
 
 ## 9. Uso de Inteligência Artificial
 
