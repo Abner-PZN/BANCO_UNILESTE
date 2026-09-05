@@ -295,7 +295,7 @@ O **DER** é anexado separadamente ao repositório (em imagem), mas sua justific
 
 O fluxograma abaixo representa os processos integrados da Unileste Comércio LTDA., incluindo cadastro de distribuidores, pedidos, pagamentos, compras, controle de estoque, logística, entrega e atualização de relatórios.
 
-![Fluxograma Geral](docs/fluxograma.png)
+![Fluxograma](docs/fluxograma.png)
 
 **Legenda:**
 - 🔵 Azul = Processo
