@@ -7,7 +7,7 @@ A organização escolhida é a Unileste Comércio LTDA., empresa de pequeno port
 A empresa possui fins lucrativos e conta atualmente com 9 funcionários diretos e cerca de 90 distribuidores que revendem seus produtos para salões de cabeleireiro. Os produtos são terceirizados — produzidos por fábricas parceiras — e comercializados exclusivamente para distribuidores, que fazem a revenda final.
 
 - **Problemas e necessidades identificados:**
-Foram identificadas dificuldades no controle das fichas de pagamento dos clientes, além da ausência de um sistema eficiente para monitorar o estoque, especialmente em relação à validade dos produtos e à quantidade disponível.
+Foram identificadas dificuldades no controle das fichas de pagamento dos distribuidor, além da ausência de um sistema eficiente para monitorar o estoque, especialmente em relação à validade dos produtos e à quantidade disponível.
 
 - **Justificativa da escolha:**
 A Unileste Comércio LTDA. está consolidada há mais de 20 anos no mercado, demonstrando solidez, experiência e capacidade de adaptação às mudanças do setor. Além disso, a empresa se destaca pelo desenvolvimento de metodologias inovadoras e produtos exclusivos, o que reforça sua relevância como caso de estudo para este projeto.
@@ -27,7 +27,7 @@ O grupo possui evidências concretas de acesso à organização, incluindo ender
 
 - **Emissão de pedidos:** geração de pedidos de compra pelos distribuidores, com conferência de disponibilidade em estoque.
 
-- **Controle de pagamentos:** acompanhamento das fichas de pagamento dos distribuidores/clientes, garantindo que os registros estejam atualizados.
+- **Controle de pagamentos:** acompanhamento das fichas de pagamento dos distribuidores, garantindo que os registros estejam atualizados.
 
 - **Entregas:** organização da logística de envio dos produtos aos distribuidores.
 
@@ -61,7 +61,7 @@ O fluxograma abaixo representa os processos integrados da Unileste Comércio LTD
 
 - O sistema deve possibilitar a geração de pedidos de compra.
 
-- O sistema deve registrar entradas e saídas de notas fiscais.
+- O sistema deve registrar as notas fiscais relacionadas aos pedidos.
 
 ## 3.2 Requisitos Não Funcionais
 
@@ -103,7 +103,7 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| ID_Distribuidor | Identificador único do distribuidor | Obrigatório, valor único |
+| id_distribuidor | Identificador único do distribuidor | Obrigatório, valor único |
 | Nome | Nome do distribuidor | Obrigatório |
 | CNPJ | Cadastro Nacional da Pessoa Jurídica | Deve ser válido e único |
 | Endereço | Localização do distribuidor | Obrigatório |
@@ -113,7 +113,7 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| ID_Produto | Identificador único do produto | Obrigatório, valor único |
+| id_produto | Identificador único do produto | Obrigatório, valor único |
 | Nome | Nome comercial do produto | Obrigatório |
 | Categoria | Categoria/Linha do produto (ex: Tutti Capelli) | Obrigatório |
 | Preço | Valor de venda do produto | Deve ser positivo |
@@ -122,45 +122,46 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| ID_Pedido | Identificador único do pedido | Obrigatório |
+| id_pedido | Identificador único do pedido | Obrigatório |
 | Data | Data de emissão do pedido | Obrigatório |
 | Status | Situação do pedido (pendente, pago, entregue) | Deve seguir valores pré-definidos |
-| ID_Distribuidor | Distribuidor que realizou o pedido | Obrigatório, chave estrangeira |
+| id_distribuidor | Distribuidor que realizou o pedido | Obrigatório, chave estrangeira |
 
 ## Entidade: Nota Fiscal
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| ID_NotaFiscal | Identificador único da nota | Obrigatório |
+| id_nf | Identificador único da nota | Obrigatório |
 | Número | Número oficial da nota | Obrigatório, único |
 | Data | Data de emissão | Obrigatório |
 | Valor | Valor total da nota | Deve ser positivo |
-| ID_Pedido | Pedido associado | Obrigatório, chave estrangeira |
+| id_pedido | Pedido associado | Obrigatório, chave estrangeira |
 
 ## Entidade: Pagamento
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| ID_Pagamento | Identificador único do pagamento | Obrigatório |
+| id_pagamento | Identificador único do pagamento | Obrigatório |
 | Data | Data do pagamento | Obrigatório |
 | Valor | Valor pago | Deve ser positivo |
-| Forma | Forma de pagamento (boleto, transferência, acordo) | Obrigatório |
-| ID_Pedido | Pedido associado | Obrigatório, chave estrangeira |
+| Forma | Forma de pagamento (boleto, transferência, etc.) | Obrigatório |
+| id_pedido | Pedido associado | Obrigatório, chave estrangeira |
 
 ## Entidade: Estoque
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| ID_Estoque | Identificador único do estoque | Obrigatório |
-| ID_Produto | Produto armazenado | Obrigatório, chave estrangeira |
+| id_estoque | Identificador único do estoque | Obrigatório |
+| id_produto | Produto armazenado | Obrigatório, chave estrangeira |
 | Quantidade | Quantidade disponível | Não pode ser negativa |
 | Validade | Data de validade do produto | Permite controlar produtos próximos do vencimento |
+| id_compra | Compra que originou este lote | Obrigatório, chave estrangeira |
 
 ## Entidade: Compra
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| ID_Compra | Identificador único da compra | Obrigatório |
+| id_compra | Identificador único da compra | Obrigatório |
 | Data | Data da compra | Obrigatório |
 | Fornecedor | Fábrica terceirizada | Obrigatório |
 | Valor | Valor da compra | Deve ser positivo |
@@ -181,6 +182,8 @@ Pagamento       | Registra a quitação financeira dos pedidos
 Estoque         | Controla a quantidade e validade dos produtos disponíveis
 Compra          | Representa a aquisição de produtos junto às fábricas terceirizadas
 
+<!-- Nota: nesta primeira etapa, a entidade Nota Fiscal representa apenas a nota fiscal de venda (vinculada ao Pedido). A nota fiscal de compra, emitida pela fábrica fornecedora e recebida no processo de entrada em estoque (ver Fluxograma), será incorporada ao modelo em uma etapa futura, junto com o refinamento do relacionamento Compra–Estoque. -->
+
 ## Atributos e classificações
 
 Os atributos e suas respectivas classificações estão detalhados no Dicionário de Dados Conceitual (Seção 5), que apresenta os atributos de cada entidade, suas descrições e as regras de negócio associadas.
@@ -193,15 +196,15 @@ Distribuidor -> Pedido          | Um distribuidor pode realizar vários pedidos
 Pedido -> Nota Fiscal           | Cada pedido gera uma nota fiscal correspondente
 Pedido -> Pagamento             | Um pedido pode ter um ou mais pagamentos associados
 Pedido -> Produto               | Um pedido é composto por um ou mais produtos, e um produto pode constar em diversos pedidos.
-Compra -> Estoque               | Uma compra realizada junto às fábricas terceirizadas pode conter diversos itens que irão abastecer o estoque.
+Compra -> Estoque               | Uma compra pode gerar vários registros de estoque, correspondentes aos lotes recebidos.
 Produto -> Estoque              | Um produto pode possuir vários lotes armazenados no estoque, e cada registro de estoque pertence a um único produto.
 
 ## Restrições e políticas organizacionais aplicadas ao modelo
 
 Restrição/Política               | Impacto no modelo
 ---------------------------------|------------------------------------------------------------
-Pedido só pode ser liberado após pagamento ou acordo | Relacionamento Pedido-Pagamento deve ser obrigatório
-Nota Fiscal só pode ser emitida com produto em estoque | Relacionamento Pedido-Nota Fiscal depende do Estoque
+Pedido liberado após pagamento ou acordo | Liberação condicionada ao pagamento ou acordo
+Nota Fiscal só pode ser emitida com produto em estoque | Emissão condicionada à disponibilidade do Estoque
 Produtos não podem ser vendidos após a validade | Atributo Validade do Produto deve ser controlado
 Estoque não pode ter quantidade negativa | Atributo Quantidade deve ter restrição >= 0
 
@@ -211,7 +214,7 @@ Estoque não pode ter quantidade negativa | Atributo Quantidade deve ter restri�
 
 ## Entidades e Relacionamentos
 
-Nota: O arquivo de imagem do DER está anexado separadamente na pasta raiz deste repositório.
+<!--Nota: O arquivo de imagem do DER está anexado separadamente na pasta raiz deste repositório. -->
 
 Entidade        | Relacionamento                          | Cardinalidade
 ----------------|-----------------------------------------|--------------------------------------------
@@ -219,7 +222,7 @@ Distribuidor    | Realiza Pedido                          | 1 Distribuidor pode 
 Pedido          | Gera Nota Fiscal                        | 1 Pedido gera 1 Nota Fiscal
 Pedido          | Possui Pagamento                        | 1 Pedido pode ter N Pagamentos
 Produto         | Possui Lotes em Estoque                 | 1 Produto pode ter N registros de Estoque
-Compra          | Abastece Estoque                        | 1 Compra pode abastecer N registros de Estoque (ou N:M dependendo de como preferir tratar os lotes de entrada)
+Compra          | Abastece Estoque                        | 1 Compra pode abastecer N registros de Estoque 
 Nota Fiscal     | Vinculada a Pedido                      | 1 Nota Fiscal corresponde a 1 Pedido
 
 ## Cardinalidades principais
@@ -232,11 +235,9 @@ Pedido – Pagamento: 1:N (um pedido pode ter vários pagamentos).
 
 Pedido – Produto: N:M (um pedido pode conter vários produtos, e um mesmo produto pode estar presente em vários pedidos diferentes).
 
-Compra – Estoque : 1:N (uma compra realizada junto à fábrica pode dar origem a múltiplos lotes/registros no estoque, enquanto cada lote de estoque é originado de uma compra específica).
+Compra – Estoque : 1 Compra pode abastecer N registros de Estoque.
 
 Produto – Estoque: 1:N (um produto do catálogo pode ter vários lotes registrados no estoque, enquanto cada lote/registro de estoque pertence a um único produto).
-
-Estoque – Compra: 1:N (um estoque pode receber produtos provenientes de várias compras, enquanto cada compra abastece um único estoque).
 
 ---
 
@@ -248,18 +249,18 @@ Decisão                         | Justificativa
 --------------------------------|------------------------------------------------------------
 Escolha das entidades           | Foram selecionadas entidades que representam os principais elementos operacionais da empresa: Distribuidor, Produto, Pedido, Nota Fiscal, Pagamento, Estoque e Compra. Cada uma reflete processos reais observados.
 Atributos obrigatórios          | Definidos para garantir integridade dos dados (ex.: ID único, CNPJ válido, quantidade >= 0, validade futura). Isso assegura consistência e evita erros operacionais.
-Relacionamentos 1:N             | A relação Compra-Estoque foi modelada como 1:N para permitir que uma única compra da fábrica registre a entrada de vários produtos/lotes no estoque da empresa.
 Relacionamentos 1:1             | Pedido-Nota Fiscal foi definido como 1:1, pois cada pedido gera uma nota fiscal única, conforme exigência legal.
-Relacionamentos N:N             | Compra-Estoque foi modelado como N:M, pois uma compra pode abastecer diferentes registros de estoque e um registro de estoque pode ser abastecido por diferentes compras.
-Cardinalidades                  | Foram aplicadas para refletir a realidade operacional: controle de estoque, múltiplos pedidos por distribuidor, restrição de validade dos produtos e obrigatoriedade de pagamento para liberação de pedidos.
+Relacionamentos 1:N             | Compra-Estoque foi modelado como 1:N, pois uma compra pode gerar vários registros de estoque, correspondentes aos lotes recebidos, enquanto cada registro de estoque possui uma única compra de origem.
+Cardinalidades                  | Foram aplicadas para refletir a realidade operacional: controle de estoque, múltiplos pedidos por distribuidor, restrição de validade dos produtos e pagamento ou acordo para liberação de pedidos.
 Restrições organizacionais      | Incorporadas ao modelo para atender exigências legais (nota fiscal obrigatória, validade de produtos) e políticas internas (liberação de pedidos mediante pagamento ou acordo).
 
 ## Por que não outras alternativas?
 
 Alternativa                      | Motivo da rejeição
 ---------------------------------|------------------------------------------------------------
-Permitir pedidos sem pagamento   | Rejeitado porque não reflete a política interna da empresa e comprometeria a integridade financeira.
+Liberar pedido sem pagamento ou acordo | Rejeitado porque não atende à política interna.
 Ignorar validade dos produtos    | Rejeitado porque a validade é crítica no setor de cosméticos e impacta diretamente a conformidade legal e a qualidade.
+Modelar Nota Fiscal de compra na mesma entidade | Rejeitado nesta etapa para não sobrecarregar o modelo conceitual inicial; nota fiscal de compra será tratada como extensão futura do modelo.
 
 ## Justificativa do DER
 
