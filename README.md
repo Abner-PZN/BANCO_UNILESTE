@@ -115,9 +115,8 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 | --- | --- | --- |
 | ID_Produto | Identificador único do produto | Obrigatório, valor único |
 | Nome | Nome comercial do produto | Obrigatório |
-| Validade | Data de vencimento | Não pode ser anterior à data atual |
-| Quantidade | Quantidade em estoque | Não pode ser negativa |
-| Marca | Linha de produto (Tutti Capelli ou Outlet Hair) | Obrigatório |
+| Categoria | Categoria/Linha do produto (ex: Tutti Capelli) | Obrigatório |
+| Preço | Valor de venda do produto | Deve ser positivo |
 
 ## Entidade: Pedido
 
@@ -193,8 +192,9 @@ Relacionamento                  | Descrição
 Distribuidor -> Pedido          | Um distribuidor pode realizar vários pedidos
 Pedido -> Nota Fiscal           | Cada pedido gera uma nota fiscal correspondente
 Pedido -> Pagamento             | Um pedido pode ter um ou mais pagamentos associados
-Compra -> Estoque               | Cada compra pode abastecer o estoque com os produtos adquiridos
-Estoque -> Produto              | Um estoque pode conter vários produtos, e cada produto pertence a um único estoque.
+Pedido -> Produto               | Um pedido é composto por um ou mais produtos, e um produto pode constar em diversos pedidos.
+Compra -> Estoque               | Uma compra realizada junto às fábricas terceirizadas pode conter diversos itens que irão abastecer o estoque.
+Produto -> Estoque              | Um produto pode possuir vários lotes armazenados no estoque, e cada registro de estoque pertence a um único produto.
 
 ## Restrições e políticas organizacionais aplicadas ao modelo
 
@@ -218,8 +218,8 @@ Entidade        | Relacionamento                          | Cardinalidade
 Distribuidor    | Realiza Pedido                          | 1 Distribuidor pode realizar N Pedidos
 Pedido          | Gera Nota Fiscal                        | 1 Pedido gera 1 Nota Fiscal
 Pedido          | Possui Pagamento                        | 1 Pedido pode ter N Pagamentos
-Estoque         | Contém Produtos                         | 1 Estoque pode conter N Produtos
-Compra          | Abastece estoque                        | N:M
+Produto         | Possui Lotes em Estoque                 | 1 Produto pode ter N registros de Estoque
+Compra          | Abastece Estoque                        | 1 Compra pode abastecer N registros de Estoque (ou N:M dependendo de como preferir tratar os lotes de entrada)
 Nota Fiscal     | Vinculada a Pedido                      | 1 Nota Fiscal corresponde a 1 Pedido
 
 ## Cardinalidades principais
@@ -230,9 +230,11 @@ Pedido – Nota Fiscal: 1:1 (cada pedido gera uma nota fiscal única).
 
 Pedido – Pagamento: 1:N (um pedido pode ter vários pagamentos).
 
-Compra – Estoque: N:M (uma compra pode estar relacionada ao estoque, e o estoque pode receber produtos provenientes de diferentes compras).
+Pedido – Produto: N:M (um pedido pode conter vários produtos, e um mesmo produto pode estar presente em vários pedidos diferentes).
 
-Estoque – Produto: 1:N (um estoque pode armazenar vários produtos, enquanto cada produto pertence a um único estoque).
+Compra – Estoque : 1:N (uma compra realizada junto à fábrica pode dar origem a múltiplos lotes/registros no estoque, enquanto cada lote de estoque é originado de uma compra específica).
+
+Produto – Estoque: 1:N (um produto do catálogo pode ter vários lotes registrados no estoque, enquanto cada lote/registro de estoque pertence a um único produto).
 
 Estoque – Compra: 1:N (um estoque pode receber produtos provenientes de várias compras, enquanto cada compra abastece um único estoque).
 
@@ -246,7 +248,7 @@ Decisão                         | Justificativa
 --------------------------------|------------------------------------------------------------
 Escolha das entidades           | Foram selecionadas entidades que representam os principais elementos operacionais da empresa: Distribuidor, Produto, Pedido, Nota Fiscal, Pagamento, Estoque e Compra. Cada uma reflete processos reais observados.
 Atributos obrigatórios          | Definidos para garantir integridade dos dados (ex.: ID único, CNPJ válido, quantidade >= 0, validade futura). Isso assegura consistência e evita erros operacionais.
-Relacionamentos 1:N             | Distribuidor-Pedido e Pedido-Pagamento foram modelados como 1:N porque um distribuidor pode gerar vários pedidos e um pedido pode ter múltiplos pagamentos.
+Relacionamentos 1:N             | A relação Compra-Estoque foi modelada como 1:N para permitir que uma única compra da fábrica registre a entrada de vários produtos/lotes no estoque da empresa.
 Relacionamentos 1:1             | Pedido-Nota Fiscal foi definido como 1:1, pois cada pedido gera uma nota fiscal única, conforme exigência legal.
 Relacionamentos N:N             | Compra-Estoque foi modelado como N:M, pois uma compra pode abastecer diferentes registros de estoque e um registro de estoque pode ser abastecido por diferentes compras.
 Cardinalidades                  | Foram aplicadas para refletir a realidade operacional: controle de estoque, múltiplos pedidos por distribuidor, restrição de validade dos produtos e obrigatoriedade de pagamento para liberação de pedidos.
