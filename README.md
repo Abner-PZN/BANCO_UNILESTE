@@ -285,9 +285,13 @@ Reflexão crítica             | O uso da IA trouxe agilidade e organização, m
 
 ---
 
-## Diagrama Entidade-Relacionamento (DER)
+# Justificativa do DER
 
-O **DER** é anexado separadamente ao repositório (em imagem), mas sua justificativa técnica já está descrita neste README na Seção 8.
+O Diagrama Entidade-Relacionamento (DER) foi elaborado para representar de forma estruturada os principais processos da Unileste Comércio LTDA. As entidades escolhidas — Distribuidor, Pedido, Produto, Pagamento, Nota Fiscal, Compra, Estoque e Entrega — refletem diretamente as operações observadas na empresa.
+
+Os relacionamentos definidos garantem integridade e consistência dos dados: distribuidores realizam pedidos, cada pedido gera nota fiscal, pagamento e entrega, enquanto as compras abastecem o estoque e os produtos são controlados por validade e quantidade.
+
+Esse modelo evita redundâncias, facilita consultas e assegura que todas as etapas do fluxo de negócio estejam corretamente representadas, servindo como base sólida para o desenvolvimento de um sistema de informação confiável e eficiente.
 
 ---
 
