@@ -1,7 +1,7 @@
 # Nome
-Abner Barbosa Machado
-Kauã Freitas Passos Perroni
-Luís Cauan Sena Rodrigues
+- Abner Barbosa Machado.  
+- Kauã Freitas Passos Perroni.
+- Luís Cauan Sena Rodrigues.
 
 # 1. Caracterização da Organização 
 
