@@ -1,7 +1,12 @@
-# Nome
-| Abner Barbosa Machado        | 46625402 |
-| Kauã Freitas Passos Perroni. |          |
-| Luís Cauan Sena Rodrigues.   |          |
+# UNILESTE COSMÉTICOS
+
+## INTEGRANTES
+
+| NOME | RGM |
+| --- | --- |
+| Abner Barbosa Machado        | 4662540-2 |
+| Kauã Freitas Passos Perroni. |           |
+| Luís Cauan Sena Rodrigues.   |           |
 
 # 1. Caracterização da Organização 
 
