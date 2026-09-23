@@ -333,7 +333,7 @@ O modelo conceitual foi estruturado para refletir fielmente os processos da Unil
 
 Item                         | O que registrar
 -----------------------------|------------------------------------------------------------
-Ferramenta e etapa           | Microsoft Copilot (IA) utilizada na redação do README, organização dos requisitos, modelagem conceitual e estruturação das tabelas.
+Ferramenta e etapa           | Microsoft Copilot (IA) e CHATGPT utilizados na redação do README, organização dos requisitos, modelagem conceitual e estruturação das tabelas.
 Motivação                    | O grupo recorreu à IA para agilizar a escrita, garantir clareza na documentação e padronizar o formato exigido pelo professor.
 Prompt(s) utilizados         | Exemplos: "Monte a seção 1 com base nestes dados da empresa que estou te passando em anexo", "Monte a seção 6 com atributos e classificações".
 Resposta recebida            | A IA forneceu textos estruturados, tabelas formatadas e explicações sobre entidades, atributos, relacionamentos e regras de negócio.
