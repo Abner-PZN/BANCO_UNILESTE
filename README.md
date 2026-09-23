@@ -5,7 +5,7 @@
 | NOME | RGM |
 | --- | --- |
 | Abner Barbosa Machado        | 4662540-2 |
-| Kauã Freitas Passos Perroni. |           |
+| Kauã Freitas Passos Perroni. | 4774900-8 |
 | Luís Cauan Sena Rodrigues.   |           |
 
 # 1. Caracterização da Organização 
