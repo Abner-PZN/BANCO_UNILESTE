@@ -1,7 +1,7 @@
 # Nome
-- Abner Barbosa Machado.  
-- Kauã Freitas Passos Perroni.
-- Luís Cauan Sena Rodrigues.
+| Abner Barbosa Machado        | 46625402 |
+| Kauã Freitas Passos Perroni. |          |
+| Luís Cauan Sena Rodrigues.   |          |
 
 # 1. Caracterização da Organização 
 
@@ -108,68 +108,88 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| id_distribuidor | Identificador único do distribuidor | Obrigatório, valor único |
-| Nome | Nome do distribuidor | Obrigatório |
+| id_distribuidor (PK) | Identificador único do distribuidor | Obrigatório, valor único e (chave primária) |
+| nome | Nome do distribuidor | Obrigatório |
 | CNPJ | Cadastro Nacional da Pessoa Jurídica | Deve ser válido e único |
-| Endereço | Localização do distribuidor | Obrigatório |
-| Telefone | Contato principal | Opcional |
+| endereço | Localização do distribuidor | Obrigatório |
+| telefone | Contato principal do distribuidor | Opcional |
 
 ## Entidade: Produto
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| id_produto | Identificador único do produto | Obrigatório, valor único |
-| Nome | Nome comercial do produto | Obrigatório |
-| Categoria | Categoria/Linha do produto (ex: Tutti Capelli) | Obrigatório |
-| Preço | Valor de venda do produto | Deve ser positivo |
+| id_produto (PK) | Identificador único do produto | Obrigatório, valor único e (chave primária) |
+| nome | Nome comercial do produto | Obrigatório |
+| tipo | Classificação do produto (ex.: Shampoo, Condicionador, Máscara Capilar, etc.) | Obrigatório e deve pertencer aos tipos permitidos pelo sistema |
+| preço | Valor de venda do produto | Deve ser positivo |
 
 ## Entidade: Pedido
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| id_pedido | Identificador único do pedido | Obrigatório |
-| Data | Data de emissão do pedido | Obrigatório |
-| Status | Situação do pedido (pendente, pago, entregue) | Deve seguir valores pré-definidos |
-| id_distribuidor | Distribuidor que realizou o pedido | Obrigatório, chave estrangeira |
+| id_pedido (PK) | Identificador único do pedido | Obrigatório, valor único e (chave primária) |
+| data | Data de emissão do pedido | Obrigatório |
+| status | Situação do pedido (pendente, pago, entregue) | Deve seguir valores pré-definidos |
+| id_distribuidor (FK)| identificador do distribuidor que realizou o pedido | Obrigatório e (chave estrangeira) |
+
+## Entidade: Item_Pedido
+
+| Atributo | Descrição | Regra de negócio associada |
+| --- | --- | --- |
+| id_item_pedido (PK) | Identificador único do item do pedido | Obrigatório, valor único |
+| id_pedido (FK) | Identificador do pedido ao qual o item pertence | Obrigatório e (chave estrangeira) |
+| id_produto (FK) | Identificador do produto incluído no pedido | Obrigatório e (chave estrangeira) |
+| quantidade | Quantidade solicitada do produto | Obrigatório e deve ser maior que zero |
+
 
 ## Entidade: Nota Fiscal
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| id_nf | Identificador único da nota | Obrigatório |
-| Número | Número oficial da nota | Obrigatório, único |
-| Data | Data de emissão | Obrigatório |
-| Valor | Valor total da nota | Deve ser positivo |
-| id_pedido | Pedido associado | Obrigatório, chave estrangeira |
+| id_nf (PK) | Identificador único da nota | Obrigatório, valor único e (chave primária) |
+| número | Número oficial da nota | Obrigatório e único |
+| data | Data de emissão | Obrigatório |
+| valor | Valor total da nota | Deve ser positivo |
+| id_pedido (FK) | Identificador do pedido associado | Obrigatório e (chave estrangeira) |
 
 ## Entidade: Pagamento
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| id_pagamento | Identificador único do pagamento | Obrigatório |
+| id_pagamento (PK) | Identificador único do pagamento | Obrigatório e (chave primária) |
 | Data | Data do pagamento | Obrigatório |
 | Valor | Valor pago | Deve ser positivo |
 | Forma | Forma de pagamento (boleto, transferência, etc.) | Obrigatório |
-| id_pedido | Pedido associado | Obrigatório, chave estrangeira |
+| id_pedido (FK) | Identificador do pedido associado | Obrigatório e (chave estrangeira) |
 
-## Entidade: Estoque
+## Entidade: Fornecedor
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| id_estoque | Identificador único do estoque | Obrigatório |
-| id_produto | Produto armazenado | Obrigatório, chave estrangeira |
-| Quantidade | Quantidade disponível | Não pode ser negativa |
-| Validade | Data de validade do produto | Permite controlar produtos próximos do vencimento |
-| id_compra | Compra que originou este lote | Obrigatório, chave estrangeira |
+| id_fornecedor (PK) | Identificador único do fornecedor | Obrigatório, valor único e (chave primária) |
+| id_nome | Nome do fornecedor | Obrigatório |
+| CNPJ | Cadastro Nacional da Pessoa Juríica | Dever ser válido e único |
+| endereço | Endereço do fornecedor | Obrigatório |
+| telefone | contato do fornecedor | Obrigatório |
 
 ## Entidade: Compra
 
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
-| id_compra | Identificador único da compra | Obrigatório |
-| Data | Data da compra | Obrigatório |
-| Fornecedor | Fábrica terceirizada | Obrigatório |
+| id_compra (PK)| Identificador único da compra | Obrigatório, valor único e (Chave primária) |
+| data | Data da compra | Obrigatório |
+| id_fornecedor (FK) | Identificador do fornecedor | Obrigatório e (chave estrangeira) |
 | Valor | Valor da compra | Deve ser positivo |
+
+## Entidade: Lote
+
+| Atributo | Descrição | Regra de negócio associada |
+| --- | --- | --- |
+| id_lote (PK) | Identificador único do lote | Obrigatório, valor único e (chave primária) |
+| id_compra (FK) | Identificador da compra que originou o lote | Obrigatório e (Chave estrangeira) |
+| id_produto (FK) | Identificador do produto ao qual o lote pertence   | Obrigatório e (chave estrangeira) |
+| quantidade | Quantidade de produtos existentes no lote | Obrigatório e deve ser maior que zero |  
+| validade | Data e validade do lote | Obrigatório e deve ser uma data válida igual ou posterior à data da compra |
 
 --- 
 
@@ -179,39 +199,54 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 
 Entidade        | Justificativa
 ----------------|------------------------------------------------------------
-Distribuidor    | Representa os parceiros que revendem os produtos da empresa
-Produto         | Representa os itens comercializados pelas marcas Tutti Capelli e Outlet Hair
-Pedido          | Formaliza a solicitação de compra feita pelos distribuidores
-Nota Fiscal     | Documento fiscal obrigatório que valida cada transação
-Pagamento       | Registra a quitação financeira dos pedidos
-Estoque         | Controla a quantidade e validade dos produtos disponíveis
-Compra          | Representa a aquisição de produtos junto às fábricas terceirizadas
+Distribuidor    | Representa os parceiros que revendem os produtos da empresa.
+Produto         | Representa os itens comercializados pela organização.
+Pedido          | Formaliza a solicitação de compra feita pelos distribuidores.
+Item_Pedido     | Representa cada produto incluído em um pedido, permitindo múltiplos produtos por pedido.
+Nota Fiscal     | Documento fiscal obrigatório que valida cada transação.
+Pagamento       | Registra a quitação financeira dos pedidos.
+Fornecedor      | Representa as fábricas terceirizadas responsáveis pelo fornecimento dos produtos.
+Compra          | Representa a aquisição de produtos junto aos fornecedors.
+Lote            | Controla os lotes recebidos, permitindo rastrear quantidade, validade e origem da compra.
 
 <!-- Nota: nesta primeira etapa, a entidade Nota Fiscal representa apenas a nota fiscal de venda (vinculada ao Pedido). A nota fiscal de compra, emitida pela fábrica fornecedora e recebida no processo de entrada em estoque (ver Fluxograma), será incorporada ao modelo em uma etapa futura, junto com o refinamento do relacionamento Compra–Estoque. -->
 
 ## Atributos e classificações
 
-Os atributos e suas respectivas classificações estão detalhados no Dicionário de Dados Conceitual (Seção 5), que apresenta os atributos de cada entidade, suas descrições e as regras de negócio associadas.
+Os atributos de cada entidade estão descritos no Dicionário de Dados Conceitual (Seção 5), contendo sua identificação, descrição e respectivas regras de negócio.
+
+## Classificação dos atributos
+
+**Chaves Primárias (PK):** id_distribuidor, id_produto, id_pedido, id_item_pedido, id_nf, id_pagamento, id_fornecedor, id_compra e id_lote.
+
+**Chaves Estrangeiras (FK):** id_distribuidor em Pedido; id_pedido e id_produto em Item_Pedido; id_pedido em Nota Fiscal; id_pedido em Pagamento; id_fornecedor em Compra; id_compra e id_produto em Lote.
+
+**Atributos descritivos:** nome, endereço, telefone, data, status, valor, forma, tipo, número, quantidade e validade.
 
 ## Relacionamentos pertinentes
 
 Relacionamento                  | Descrição
 --------------------------------|------------------------------------------------------------
-Distribuidor -> Pedido          | Um distribuidor pode realizar vários pedidos
-Pedido -> Nota Fiscal           | Cada pedido gera uma nota fiscal correspondente
+Distribuidor -> Pedido          | Um distribuidor pode realizar vários pedidos, enquanto cada pedido pertence a um único distribuidor.
+Pedido -> Item_Pedido           | Um pedido pode possuir vários itens, e cada item pertence a um único pedido.
+Item_Pedido -> Produto          | Cada item corresponde a um único produto, enquanto um produto pode aparecer em diversos itens de pedidos.
+Pedido -> Nota Fiscal           | Um pedido pode gerar uma única nota fiscal, e cada nota fiscal pertence a um único pedido.
 Pedido -> Pagamento             | Um pedido pode ter um ou mais pagamentos associados
-Pedido -> Produto               | Um pedido é composto por um ou mais produtos, e um produto pode constar em diversos pedidos.
-Compra -> Estoque               | Uma compra pode gerar vários registros de estoque, correspondentes aos lotes recebidos.
-Produto -> Estoque              | Um produto pode possuir vários lotes armazenados no estoque, e cada registro de estoque pertence a um único produto.
+Fornecedor -> Compra            | Um fornecedor pode realizar várias vendas para a organização, enquanto cada compra pertence a um único fornecedor.
+Compra -> Lote                  | Uma compra pode gerar vários lotes, e cada lote é originado por uma única compra.
+Produto -> Lote                 | Um produto pode possuir diversos lotes, enquanto cada lote pertence a um único produto.
 
 ## Restrições e políticas organizacionais aplicadas ao modelo
 
 Restrição/Política               | Impacto no modelo
 ---------------------------------|------------------------------------------------------------
-Pedido liberado após pagamento ou acordo | Liberação condicionada ao pagamento ou acordo
-Nota Fiscal só pode ser emitida com produto em estoque | Emissão condicionada à disponibilidade do Estoque
-Produtos não podem ser vendidos após a validade | Atributo Validade do Produto deve ser controlado
-Estoque não pode ter quantidade negativa | Atributo Quantidade deve ter restrição >= 0
+Um pedido deve estar vinculado a um distribuidor cadastrado. | Garante a integridade dos pedidos.
+Cada item do pedido deve referenciar um produto existente. | Impede a inclusão de produtos inexistentes.
+A quantidade do item do pedido deve ser maior que zero. | Evita registros inválidos.
+A nota fiscal deve estar vinculada a um único pedido. | Mantém a conformidade fiscal.
+Um lote deve pertencer simultaneamente a uma única compra e a um único produto. | Garante a rastreabilidade do estoque.
+Produtos não podem ser comercializados após o vencimento. | O atributo validade do lote deve ser controlado.
+Valores monetários de compras, pagamentos e notas fiscais devem ser positivos. | Evita inconsistências financeiras.
 
 ---
 
@@ -224,27 +259,32 @@ Estoque não pode ter quantidade negativa | Atributo Quantidade deve ter restri�
 Entidade        | Relacionamento                          | Cardinalidade
 ----------------|-----------------------------------------|--------------------------------------------
 Distribuidor    | Realiza Pedido                          | 1 Distribuidor pode realizar N Pedidos
+Pedido          | Possui Item_Pedido                      | 1 Pedido pode possuir N Itens de Pedido
+Item_Pedido     | Refere_se a Produto                     | 1 Produto pode estar em N Itens de Pedido
 Pedido          | Gera Nota Fiscal                        | 1 Pedido gera 1 Nota Fiscal
-Pedido          | Possui Pagamento                        | 1 Pedido pode ter N Pagamentos
-Produto         | Possui Lotes em Estoque                 | 1 Produto pode ter N registros de Estoque
-Compra          | Abastece Estoque                        | 1 Compra pode abastecer N registros de Estoque 
 Nota Fiscal     | Vinculada a Pedido                      | 1 Nota Fiscal corresponde a 1 Pedido
+Pedido          | Possui Pagamento                        | 1 Pedido pode ter N Pagamentos
+Fornecedor      | Fornece Compra                          | 1 Fornecedor pode fornecer N Compras
+Compra          | Abastece Lote                           | 1 Compra pode gerar N Lotes 
+Produto         | Pertence a Lote                         | 1 Produto pode possuir N Lotes
 
 ## Cardinalidades principais
 
-Distribuidor – Pedido: 1:N (um distribuidor pode ter vários pedidos).
+**Distribuidor – Pedido:** 1:N (um distribuidor pode realizar vários pedidos).
 
-Pedido – Nota Fiscal: 1:1 (cada pedido gera uma nota fiscal única).
+**Pedido – Item_Pedido:** 1:N (um pedido pode possuir vários itens).
 
-Pedido – Pagamento: 1:N (um pedido pode ter vários pagamentos).
+**Item_Pedido – Produto:** N:1 (cada item refere-se a um único produto, enquanto um produto pode aparecer em diversos itens).
 
-Pedido – Produto: N:M (um pedido pode conter vários produtos, e um mesmo produto pode estar presente em vários pedidos diferentes).
+**Pedido – Nota Fiscal:** 0:1 (um pedido pode ainda não possuir nota fiscal; quando emitida, pertence a um único pedido).
 
-Compra – Estoque : 1 Compra pode abastecer N registros de Estoque.
+**Pedido – Pagamento:** 1:N (um pedido pode possuir um ou mais pagamentos).
 
-Produto – Estoque: 1:N (um produto do catálogo pode ter vários lotes registrados no estoque, enquanto cada lote/registro de estoque pertence a um único produto).
+**Fornecedor – Compra:** 1:N (um fornecedor pode estar associado a várias compras).
 
----
+**Compra – Lote:** 1:N (uma compra pode gerar vários lotes).
+
+**Produto – Lote:** 1:N (um produto pode possuir diversos lotes).
 
 # 8. Justificativa Técnica
 
@@ -252,11 +292,11 @@ Produto – Estoque: 1:N (um produto do catálogo pode ter vários lotes registr
 
 Decisão                         | Justificativa
 --------------------------------|------------------------------------------------------------
-Escolha das entidades           | Foram selecionadas entidades que representam os principais elementos operacionais da empresa: Distribuidor, Produto, Pedido, Nota Fiscal, Pagamento, Estoque e Compra. Cada uma reflete processos reais observados.
-Atributos obrigatórios          | Definidos para garantir integridade dos dados (ex.: ID único, CNPJ válido, quantidade >= 0, validade futura). Isso assegura consistência e evita erros operacionais.
-Relacionamentos 1:1             | Pedido-Nota Fiscal foi definido como 1:1, pois cada pedido gera uma nota fiscal única, conforme exigência legal.
-Relacionamentos 1:N             | Compra-Estoque foi modelado como 1:N, pois uma compra pode gerar vários registros de estoque, correspondentes aos lotes recebidos, enquanto cada registro de estoque possui uma única compra de origem.
-Cardinalidades                  | Foram aplicadas para refletir a realidade operacional: controle de estoque, múltiplos pedidos por distribuidor, restrição de validade dos produtos e pagamento ou acordo para liberação de pedidos.
+Escolha das entidades           | Foram selecionadas entidades que representam os principais processos operacionais da Unileste Comércio LTDA.: Distribuidor, Pedido, Item_Pedido, Produto, Nota Fiscal, Pagamento, Fornecedor, Compra e Lote. Cada uma corresponde a uma etapa real observada na empresa.
+Atributos obrigatórios          | Foram definidos atributos essenciais para garantir integridade dos dados, como identificadores únicos, CNPJ válido, quantidade maior que zero e valores monetários positivos.
+Relacionamentos 0:1             | Foi modelado como 0:1, pois um pedido pode ainda não ter nota fiscal emitida; quando emitida, ela pertence exclusivamente a um único pedido.
+Relacionamentos 1:N             | Ambos foram definidos como 1:N para representar que uma compra pode gerar vários lotes e que um produto pode existir em diversos lotes, mantendo a rastreabilidade do estoque.
+Cardinalidades                  | Foram definidas para representar fielmente o funcionamento da empresa, evitando redundâncias e garantindo consistência entre pedidos, produtos, compras e lotes.
 Restrições organizacionais      | Incorporadas ao modelo para atender exigências legais (nota fiscal obrigatória, validade de produtos) e políticas internas (liberação de pedidos mediante pagamento ou acordo).
 
 ## Por que não outras alternativas?
@@ -266,10 +306,12 @@ Alternativa                      | Motivo da rejeição
 Liberar pedido sem pagamento ou acordo | Rejeitado porque não atende à política interna.
 Ignorar validade dos produtos    | Rejeitado porque a validade é crítica no setor de cosméticos e impacta diretamente a conformidade legal e a qualidade.
 Modelar Nota Fiscal de compra na mesma entidade | Rejeitado nesta etapa para não sobrecarregar o modelo conceitual inicial; nota fiscal de compra será tratada como extensão futura do modelo.
+Permitir um lote vinculado a várias compras | Rejeitada porque cada lote deve possuir uma única compra de origem, garantindo rastreabilidade.
+
 
 ## Justificativa do DER
 
-O Diagrama Entidade-Relacionamento (DER) foi elaborado para representar de forma estruturada os principais processos da Unileste Comércio LTDA. As entidades escolhidas — Distribuidor, Pedido, Produto, Pagamento, Nota Fiscal, Compra e Estoque — refletem diretamente as operações observadas na empresa.
+O Diagrama Entidade-Relacionamento (DER) foi elaborado para representar de forma estruturada os principais processos da Unileste Comércio LTDA.   O modelo contempla as operações de distribuição, vendas, pagamentos, compras e controle de estoque por lotes, permitindo representar o fluxo completo desde a aquisição dos produtos junto aos fornecedores até sua comercialização aos distribuidores.
 
 Os relacionamentos definidos garantem integridade e consistência dos dados: distribuidores realizam pedidos, cada pedido gera nota fiscal, pagamento e entrega, enquanto as compras abastecem o estoque e os produtos são controlados por validade e quantidade.
 
