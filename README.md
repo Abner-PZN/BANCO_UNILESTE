@@ -6,7 +6,7 @@
 | --- | --- |
 | Abner Barbosa Machado        | 4662540-2 |
 | Kauã Freitas Passos Perroni. | 4774900-8 |
-| Luís Cauan Sena Rodrigues.   |           |
+| Luís Cauan Sena Rodrigues.   | 4683553-9
 
 # 1. Caracterização da Organização 
 
