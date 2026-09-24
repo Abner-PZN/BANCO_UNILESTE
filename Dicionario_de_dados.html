@@ -61,6 +61,13 @@
         border-radius: 14px;
         border: 1px solid var(--border);
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .section:hover {
+        transform: translateY(-2px);
+        border-color: rgba(37, 99, 235, 0.5);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
       }
 
       .section h2 {
@@ -81,6 +88,13 @@
         border-radius: 12px;
         padding: 20px;
         text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .metric:hover {
+        transform: translateY(-3px);
+        border-color: rgba(37, 99, 235, 0.5);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
       }
 
       .metric strong {
@@ -96,6 +110,13 @@
         padding: 25px;
         margin-bottom: 28px;
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .entity:hover {
+        transform: translateY(-2px);
+        border-color: rgba(37, 99, 235, 0.5);
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
       }
 
       .entity h3 {
@@ -123,6 +144,11 @@
         padding: 12px;
         border-top: 1px solid var(--border);
         vertical-align: top;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+      }
+
+      tr:hover td {
+        background: #f8fafc;
       }
 
       code {
@@ -137,6 +163,53 @@
         border-left: 4px solid var(--primary);
         margin-bottom: 18px;
         font-family: Consolas, monospace;
+      }
+
+      .conventions {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 25px;
+        margin-bottom: 24px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .conventions h2 {
+        color: var(--secondary);
+        margin-bottom: 18px;
+      }
+
+      .conventions p {
+        margin-bottom: 12px;
+        color: var(--text);
+      }
+
+      .conventions strong {
+        color: var(--secondary);
+      }
+
+      .conventions-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        list-style: none;
+        margin-top: 14px;
+        padding: 0;
+      }
+
+      .conventions-list li {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: var(--secondary);
+        font-weight: 600;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .conventions-list li:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(37, 99, 235, 0.08);
       }
     </style>
   </head>
@@ -245,14 +318,14 @@
         </p>
       </section>
 
-      <section class="section">
+      <section class="conventions">
         <h2>3. Convenções</h2>
 
         <p><strong>SGBD:</strong> MySQL 8 (InnoDB).</p>
         <p><strong>Codificação:</strong> UTF8MB4.</p>
         <p><strong>Prefixos utilizados:</strong></p>
 
-        <ul>
+        <ul class="conventions-list">
           <li>ID – Identificador</li>
           <li>NM – Nome</li>
           <li>DT – Data</li>
