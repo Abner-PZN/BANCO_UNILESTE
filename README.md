@@ -47,7 +47,7 @@ O grupo possui evidências concretas de acesso à organização, incluindo ender
 
 O fluxograma abaixo representa os processos integrados da Unileste Comércio LTDA., incluindo cadastro de distribuidores, pedidos, pagamentos, compras, controle de estoque, logística, entrega e atualização de relatórios.
 
-![Fluxograma Geral](Docs/Fluxograma1.1.png)
+![Fluxograma Geral](Fluxograma1.1.png)
 
 **Legenda:**
 - 🔵 Azul = Processo
