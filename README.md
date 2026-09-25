@@ -162,8 +162,8 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 | Atributo | Descrição | Regra de negócio associada |
 | --- | --- | --- |
 | id_fornecedor (PK) | Identificador único do fornecedor | Obrigatório, valor único e (chave primária) |
-| id_nome | Nome do fornecedor | Obrigatório |
-| CNPJ | Cadastro Nacional da Pessoa Juríica | Dever ser válido e único |
+| nome | Nome do fornecedor | Obrigatório |
+| CNPJ | Cadastro Nacional da Pessoa Jurídica | Deve ser válido e único |
 | endereço | Endereço do fornecedor | Obrigatório |
 | telefone | contato do fornecedor | Obrigatório |
 
@@ -200,7 +200,7 @@ Pedido          | Formaliza a solicitação de compra feita pelos distribuidores
 Nota Fiscal     | Documento fiscal obrigatório que valida cada transação.
 Pagamento       | Registra a quitação financeira dos pedidos.
 Fornecedor      | Representa as fábricas terceirizadas responsáveis pelo fornecimento dos produtos.
-Compra          | Representa a aquisição de produtos junto aos fornecedors.
+Compra          | Representa a aquisição de produtos junto aos fornecedores.
 Lote            | Controla os lotes recebidos, permitindo rastrear quantidade, validade e origem da compra.
 
 <!-- Nota: nesta primeira etapa, a entidade Nota Fiscal representa apenas a nota fiscal de venda (vinculada ao Pedido). A nota fiscal de compra, emitida pela fábrica fornecedora e recebida no processo de entrada em estoque (ver Fluxograma), será incorporada ao modelo em uma etapa futura, junto com o refinamento do relacionamento Compra–Estoque. -->
