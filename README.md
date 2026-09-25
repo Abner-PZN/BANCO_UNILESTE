@@ -45,7 +45,9 @@ O grupo possui evidências concretas de acesso à organização, incluindo ender
 
 ## Fluxograma:  
 
-O fluxograma representa os processos integrados da Unileste Comércio LTDA., incluindo cadastro de distribuidores, pedidos, pagamentos, compras, controle de estoque, logística, entrega e atualização de relatórios.
+O fluxograma abaixo representa os processos integrados da Unileste Comércio LTDA., incluindo cadastro de distribuidores, pedidos, pagamentos, compras, controle de estoque, logística, entrega e atualização de relatórios.
+
+![Fluxograma Geral](Docs/Fluxograma1.1.png)
 
 **Legenda:**
 - 🔵 Azul = Processo
@@ -250,6 +252,10 @@ Valores monetários de compras, pagamentos e notas fiscais devem ser positivos. 
 ---
 
 # 7. Diagrama Entidade-Relacionamento (DER)
+
+## DER da UNILESTE
+
+![DER_2.0](Docs/DER_2.0.jpg)
 
 ## Entidades e Relacionamentos
 
