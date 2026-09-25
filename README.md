@@ -133,17 +133,9 @@ A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigente
 | id_pedido (PK) | Identificador único do pedido | Obrigatório, valor único e (chave primária) |
 | data | Data de emissão do pedido | Obrigatório |
 | status | Situação do pedido (pendente, pago, entregue) | Deve seguir valores pré-definidos |
-| id_distribuidor (FK)| identificador do distribuidor que realizou o pedido | Obrigatório e (chave estrangeira) |
+| id_distribuidor (FK) | Identificador do distribuidor que realizou o pedido | Obrigatório e (chave estrangeira) |
 
-## Entidade: Item_Pedido
-
-| Atributo | Descrição | Regra de negócio associada |
-| --- | --- | --- |
-| id_item_pedido (PK) | Identificador único do item do pedido | Obrigatório, valor único |
-| id_pedido (FK) | Identificador do pedido ao qual o item pertence | Obrigatório e (chave estrangeira) |
-| id_produto (FK) | Identificador do produto incluído no pedido | Obrigatório e (chave estrangeira) |
-| quantidade | Quantidade solicitada do produto | Obrigatório e deve ser maior que zero |
-
+> Observação: no modelo conceitual atual, o Pedido não possui mais os atributos id_produto e quantidade diretamente, pois a quantidade solicitada de cada produto é tratada no relacionamento Pedido-Produto.
 
 ## Entidade: Nota Fiscal
 
@@ -204,8 +196,7 @@ Entidade        | Justificativa
 ----------------|------------------------------------------------------------
 Distribuidor    | Representa os parceiros que revendem os produtos da empresa.
 Produto         | Representa os itens comercializados pela organização.
-Pedido          | Formaliza a solicitação de compra feita pelos distribuidores.
-Item_Pedido     | Representa cada produto incluído em um pedido, permitindo múltiplos produtos por pedido.
+Pedido          | Formaliza a solicitação de compra feita pelos distribuidores e relaciona-se diretamente com os produtos solicitados.
 Nota Fiscal     | Documento fiscal obrigatório que valida cada transação.
 Pagamento       | Registra a quitação financeira dos pedidos.
 Fornecedor      | Representa as fábricas terceirizadas responsáveis pelo fornecimento dos produtos.
@@ -214,15 +205,21 @@ Lote            | Controla os lotes recebidos, permitindo rastrear quantidade, v
 
 <!-- Nota: nesta primeira etapa, a entidade Nota Fiscal representa apenas a nota fiscal de venda (vinculada ao Pedido). A nota fiscal de compra, emitida pela fábrica fornecedora e recebida no processo de entrada em estoque (ver Fluxograma), será incorporada ao modelo em uma etapa futura, junto com o refinamento do relacionamento Compra–Estoque. -->
 
+### Relacionamentos ajustados
+
+- Um Distribuidor realiza um Pedido.
+- Um Pedido é associado a um ou mais Produtos, sendo a quantidade solicitada tratada como atributo do relacionamento Pedido-Produto.
+- Cada Pedido pode gerar uma Nota Fiscal e registrar um Pagamento.
+
 ## Atributos e classificações
 
 Os atributos de cada entidade estão descritos no Dicionário de Dados Conceitual (Seção 5), contendo sua identificação, descrição e respectivas regras de negócio.
 
 ## Classificação dos atributos
 
-**Chaves Primárias (PK):** id_distribuidor, id_produto, id_pedido, id_item_pedido, id_nf, id_pagamento, id_fornecedor, id_compra e id_lote.
+**Chaves Primárias (PK):** id_distribuidor, id_produto, id_pedido, id_nf, id_pagamento, id_fornecedor, id_compra e id_lote.
 
-**Chaves Estrangeiras (FK):** id_distribuidor em Pedido; id_pedido e id_produto em Item_Pedido; id_pedido em Nota Fiscal; id_pedido em Pagamento; id_fornecedor em Compra; id_compra e id_produto em Lote.
+**Chaves Estrangeiras (FK):** id_distribuidor em Pedido; id_pedido em Nota Fiscal; id_pedido em Pagamento; id_fornecedor em Compra; id_compra e id_produto em Lote.
 
 **Atributos descritivos:** nome, endereço, telefone, data, status, valor, forma, tipo, número, quantidade e validade.
 
@@ -231,10 +228,9 @@ Os atributos de cada entidade estão descritos no Dicionário de Dados Conceitua
 Relacionamento                  | Descrição
 --------------------------------|------------------------------------------------------------
 Distribuidor -> Pedido          | Um distribuidor pode realizar vários pedidos, enquanto cada pedido pertence a um único distribuidor.
-Pedido -> Item_Pedido           | Um pedido pode possuir vários itens, e cada item pertence a um único pedido.
-Item_Pedido -> Produto          | Cada item corresponde a um único produto, enquanto um produto pode aparecer em diversos itens de pedidos.
+Pedido -> Produto               | Um pedido pode incluir vários produtos, e cada produto pode aparecer em vários pedidos; a quantidade solicitada de cada produto é um atributo do relacionamento.
 Pedido -> Nota Fiscal           | Um pedido pode gerar uma única nota fiscal, e cada nota fiscal pertence a um único pedido.
-Pedido -> Pagamento             | Um pedido pode ter um ou mais pagamentos associados
+Pedido -> Pagamento             | Um pedido pode ter um ou mais pagamentos associados.
 Fornecedor -> Compra            | Um fornecedor pode realizar várias vendas para a organização, enquanto cada compra pertence a um único fornecedor.
 Compra -> Lote                  | Uma compra pode gerar vários lotes, e cada lote é originado por uma única compra.
 Produto -> Lote                 | Um produto pode possuir diversos lotes, enquanto cada lote pertence a um único produto.
@@ -244,8 +240,8 @@ Produto -> Lote                 | Um produto pode possuir diversos lotes, enquan
 Restrição/Política               | Impacto no modelo
 ---------------------------------|------------------------------------------------------------
 Um pedido deve estar vinculado a um distribuidor cadastrado. | Garante a integridade dos pedidos.
-Cada item do pedido deve referenciar um produto existente. | Impede a inclusão de produtos inexistentes.
-A quantidade do item do pedido deve ser maior que zero. | Evita registros inválidos.
+Cada produto incluído no pedido deve existir no cadastro de produtos. | Impede a inclusão de produtos inexistentes.
+A quantidade solicitada de cada produto no pedido deve ser maior que zero. | Evita registros inválidos no relacionamento Pedido-Produto.
 A nota fiscal deve estar vinculada a um único pedido. | Mantém a conformidade fiscal.
 Um lote deve pertencer simultaneamente a uma única compra e a um único produto. | Garante a rastreabilidade do estoque.
 Produtos não podem ser comercializados após o vencimento. | O atributo validade do lote deve ser controlado.
@@ -262,8 +258,8 @@ Valores monetários de compras, pagamentos e notas fiscais devem ser positivos. 
 Entidade        | Relacionamento                          | Cardinalidade
 ----------------|-----------------------------------------|--------------------------------------------
 Distribuidor    | Realiza Pedido                          | 1 Distribuidor pode realizar N Pedidos
-Pedido          | Possui Item_Pedido                      | 1 Pedido pode possuir N Itens de Pedido
-Item_Pedido     | Refere_se a Produto                     | 1 Produto pode estar em N Itens de Pedido
+Pedido          | Solicita Produto                        | 1 Pedidos podem incluir N Produtos
+Produto         | Está em Pedido                          | 1 Produtos podem aparecer em N Pedidos
 Pedido          | Gera Nota Fiscal                        | 1 Pedido gera 1 Nota Fiscal
 Nota Fiscal     | Vinculada a Pedido                      | 1 Nota Fiscal corresponde a 1 Pedido
 Pedido          | Possui Pagamento                        | 1 Pedido pode ter N Pagamentos
@@ -275,9 +271,7 @@ Produto         | Pertence a Lote                         | 1 Produto pode possu
 
 **Distribuidor – Pedido:** 1:N (um distribuidor pode realizar vários pedidos).
 
-**Pedido – Item_Pedido:** 1:N (um pedido pode possuir vários itens).
-
-**Item_Pedido – Produto:** N:1 (cada item refere-se a um único produto, enquanto um produto pode aparecer em diversos itens).
+**Pedido – Produto:** N:N (um pedido pode incluir vários produtos, e um produto pode aparecer em vários pedidos; a quantidade é tratada como atributo do relacionamento).
 
 **Pedido – Nota Fiscal:** 0:1 (um pedido pode ainda não possuir nota fiscal; quando emitida, pertence a um único pedido).
 
@@ -295,7 +289,7 @@ Produto         | Pertence a Lote                         | 1 Produto pode possu
 
 Decisão                         | Justificativa
 --------------------------------|------------------------------------------------------------
-Escolha das entidades           | Foram selecionadas entidades que representam os principais processos operacionais da Unileste Comércio LTDA.: Distribuidor, Pedido, Item_Pedido, Produto, Nota Fiscal, Pagamento, Fornecedor, Compra e Lote. Cada uma corresponde a uma etapa real observada na empresa.
+Escolha das entidades           | Foram selecionadas entidades que representam os principais processos operacionais da Unileste Comércio LTDA.: Distribuidor, Pedido, Produto, Nota Fiscal, Pagamento, Fornecedor, Compra e Lote. Cada uma corresponde a uma etapa real observada na empresa.
 Atributos obrigatórios          | Foram definidos atributos essenciais para garantir integridade dos dados, como identificadores únicos, CNPJ válido, quantidade maior que zero e valores monetários positivos.
 Relacionamentos 0:1             | Foi modelado como 0:1, pois um pedido pode ainda não ter nota fiscal emitida; quando emitida, ela pertence exclusivamente a um único pedido.
 Relacionamentos 1:N             | Ambos foram definidos como 1:N para representar que uma compra pode gerar vários lotes e que um produto pode existir em diversos lotes, mantendo a rastreabilidade do estoque.
