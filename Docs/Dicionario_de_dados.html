@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dicionário de Dados - Unileste Comércio LTDA.</title>
+    <style>
+      :root { --primary:#2563eb; --secondary:#0f172a; --bg:#f8fafc; --border:#e2e8f0; --text:#334155; --muted:#64748b; }
+      * { box-sizing:border-box; margin:0; padding:0; }
+      body { font-family:Inter,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:40px 20px; }
+      .container { max-width:1100px; margin:auto; }
+      header { background:linear-gradient(135deg,#0f172a,#1e293b); color:#fff; padding:35px; border-radius:18px; text-align:center; margin-bottom:30px; }
+      header h1 { font-size:32px; margin-bottom:8px; }
+      header p { color:#94a3b8; }
+      .section, .entity { background:#fff; padding:25px; margin-bottom:24px; border-radius:14px; border:1px solid var(--border); box-shadow:0 3px 8px rgba(0,0,0,.05); transition:transform .2s, box-shadow .2s, border-color .2s; }
+      .entity { border:2px solid var(--border); margin-bottom:28px; }
+      .section:hover, .entity:hover { transform:translateY(-2px); border-color:rgba(37,99,235,.5); box-shadow:0 8px 18px rgba(37,99,235,.08); }
+      .section h2 { color:var(--secondary); margin-bottom:16px; }
+      .section h3, .entity h3 { color:var(--secondary); margin:18px 0 8px; }
+      .entity h3 { margin-top:0; }
+      .section p, .entity p { margin-bottom:12px; }
+      .entity > p:first-of-type { color:var(--muted); }
+      .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px; margin-bottom:30px; }
+      .metric { background:#fff; border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; }
+      .metric strong { display:block; font-size:26px; color:var(--secondary); }
+      table { width:100%; border-collapse:collapse; margin-bottom:14px; }
+      th { background:#eff6ff; padding:10px; text-align:left; }
+      td { padding:10px; border-top:1px solid var(--border); vertical-align:top; }
+      tr:hover td { background:#f8fafc; }
+      code { background:#eef2ff; padding:2px 6px; border-radius:6px; }
+      .formal { background:#f8fafc; padding:14px; border-left:4px solid var(--primary); margin-bottom:18px; font-family:Consolas,monospace; white-space:pre-wrap; }
+      .note { background:#fffbeb; border-left:4px solid #f59e0b; padding:12px 14px; margin:12px 0; border-radius:6px; }
+      .conventions-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; list-style:none; margin:14px 0; }
+      .conventions-list li { background:#eff6ff; border:1px solid #dbeafe; border-radius:10px; padding:10px 12px; color:var(--secondary); font-weight:600; }
+      .scroll { overflow-x:auto; }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>DICIONÁRIO DE DADOS</h1>
+        <p>UNILESTE COMÉRCIO LTDA.</p>
+      </header>
+
+      <div class="metrics">
+        <div class="metric"><strong>08</strong>Entidades</div>
+        <div class="metric"><strong>01</strong>Associativa</div>
+        <div class="metric"><strong>07</strong>Relacionamentos</div>
+        <div class="metric"><strong>40</strong>Atributos</div>
+        <div class="metric"><strong>MySQL 8</strong>SGBD</div>
+        <div class="metric"><strong>v1.1</strong>26/out/2026</div>
+      </div>
+
+      <!-- 1 -->
+      <section class="section">
+        <h2>1. Modelo Conceitual</h2>
+        <p>
+          Este modelo representa o processo comercial da Unileste Comércio LTDA., responsável pela venda de produtos a
+          distribuidores, emissão de notas fiscais, controle de pagamentos e rastreabilidade dos lotes adquiridos junto aos fornecedores.
+        </p>
+
+        <h3>1.1 Entidade associativa identificada: PEDIDO_PRODUTO</h3>
+        <p>
+          O único relacionamento N:N do modelo é <strong>Pedido – Produto</strong> (relacionamento "Contém" no DER): um pedido tem
+          vários produtos e um produto aparece em vários pedidos. Como o modelo relacional não representa N:N diretamente, ele é
+          resolvido <strong>desde o modelo conceitual</strong> pela entidade associativa <code>PEDIDO_PRODUTO</code>, que guarda o
+          atributo do relacionamento (<code>qt_solicitada</code>) e tem chave primária composta pelas duas chaves estrangeiras
+          (<code>id_pedido</code> + <code>id_produto</code>). Assim, N:N vira dois relacionamentos 1:N:
+          PEDIDO 1:N PEDIDO_PRODUTO e PRODUTO 1:N PEDIDO_PRODUTO.
+        </p>
+
+        <h3>1.2 Cardinalidades (mínima, máxima)</h3>
+        <p>
+          Notação <code>(mín,máx)</code> lida do lado da entidade, como no DER. <strong>Mínimo 0</strong> = participação opcional (a
+          entidade pode existir sem o relacionamento); <strong>mínimo 1</strong> = participação obrigatória.
+          <strong>Máximo 1</strong> = no máximo uma ocorrência; <strong>máximo n</strong> = várias.
+        </p>
+        <div class="scroll">
+        <table>
+          <tr><th>Relacionamento</th><th>Entidade A</th><th>Entidade B</th><th>Explicação das cardinalidades</th></tr>
+          <tr>
+            <td>Distribuidor <em>realiza</em> Pedido</td><td>Distribuidor <code>(1,n)</code></td><td>Pedido <code>(1,1)</code></td>
+            <td><strong>(1,n)</strong>: o distribuidor só é registrado quando faz o primeiro pedido (fluxograma: Registrar distribuidor → Distribuidor solicita pedido), por isso não há distribuidor sem pedido, e pode fazer vários.
+            <strong>(1,1)</strong>: todo pedido pertence a exatamente um distribuidor (<code>id_distribuidor</code> NOT NULL).</td>
+          </tr>
+          <tr>
+            <td>Pedido <em>gera</em> Pagamento</td><td>Pedido <code>(0,n)</code></td><td>Pagamento <code>(1,1)</code></td>
+            <td><strong>(0,n)</strong>: o pedido pode ainda não ter pagamento (fluxograma: "Aguardar pagamento" ou acordo com o financeiro) e pode ter vários (pagamento parcelado).
+            <strong>(1,1)</strong>: cada pagamento quita exatamente um pedido (<code>id_pedido</code> NOT NULL).</td>
+          </tr>
+          <tr>
+            <td>Pedido <em>gera</em> Nota Fiscal</td><td>Pedido <code>(0,1)</code></td><td>Nota Fiscal <code>(1,1)</code></td>
+            <td><strong>(0,1)</strong>: o pedido pode ainda não ter nota emitida, mas nunca mais de uma.
+            <strong>(1,1)</strong>: toda nota pertence a exatamente um pedido (<code>id_pedido</code> NOT NULL + UNIQUE).</td>
+          </tr>
+          <tr>
+            <td>Pedido <em>contém</em> Produto <br>(via PEDIDO_PRODUTO)</td><td>Pedido <code>(1,n)</code></td><td>Produto <code>(1,n)</code></td>
+            <td><strong>Pedido (1,n)</strong>: pedido sem item não tem sentido; tem ao menos um produto e pode ter vários.
+            <strong>Produto (1,n)</strong>: conforme o DER, o produto do catálogo está associado a ao menos um pedido e pode estar em vários.</td>
+          </tr>
+          <tr>
+            <td>Produto <em>pertence</em> a Lote</td><td>Produto <code>(1,n)</code></td><td>Lote <code>(1,1)</code></td>
+            <td><strong>(1,n)</strong>: o produto tem ao menos um lote em estoque e pode ter vários, com validades diferentes.
+            <strong>(1,1)</strong>: cada lote é de exatamente um produto (<code>id_produto</code> NOT NULL).</td>
+          </tr>
+          <tr>
+            <td>Fornecedor <em>fornece</em> Compra</td><td>Fornecedor <code>(0,n)</code></td><td>Compra <code>(1,1)</code></td>
+            <td><strong>(0,n)</strong>: o fornecedor pode estar cadastrado sem nenhuma compra ainda e pode ter várias.
+            <strong>(1,1)</strong>: cada compra é feita a exatamente um fornecedor (<code>id_fornecedor</code> NOT NULL).</td>
+          </tr>
+          <tr>
+            <td>Compra <em>abastece</em> Lote</td><td>Compra <code>(1,n)</code></td><td>Lote <code>(1,1)</code></td>
+            <td><strong>(1,n)</strong>: a compra só se conclui com o recebimento de ao menos um lote e pode gerar vários.
+            <strong>(1,1)</strong>: cada lote tem uma única compra de origem, garantindo rastreabilidade (<code>id_compra</code> NOT NULL).</td>
+          </tr>
+        </table>
+        </div>
+        <div class="note">
+          <strong>Como isso vai para o SQL:</strong> o mínimo 1 do lado "1" e o máximo 1 viram <code>FOREIGN KEY ... NOT NULL</code>
+          (e <code>UNIQUE</code> na 1:1 Pedido–Nota Fiscal). O mínimo 0 vira coluna/linha opcional. Já o <strong>mínimo 1 do lado "n"</strong>
+          (ex.: pedido com ao menos um item, compra com ao menos um lote) <strong>não é imposto pelo SQL por si só</strong>: é garantido
+          por regra de aplicação, transação ou <code>TRIGGER</code>.
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="section">
+        <h2>2. Fluxo de Dados</h2>
+        <p>Visão geral: Fornecedor → Compra → Lote → Produto → Pedido → Nota Fiscal → Pagamentos. Detalhamento por etapa, seguindo o fluxograma "Processo de Atendimento e Pedidos":</p>
+        <div class="scroll">
+        <table>
+          <tr><th>Etapa</th><th>Origem → Destino</th><th>Dados que trafegam</th><th>Tabelas / operação</th></tr>
+          <tr><td>1. Cadastro e validação</td><td>Distribuidor → Sistema</td><td>nome, CNPJ, endereço, telefone</td>
+            <td>Valida CNPJ. Se inválido, solicita correção e volta a "Receber dados". Se válido: <code>INSERT</code> em <code>distribuidor</code>.</td></tr>
+          <tr><td>2. Solicitação de pedido</td><td>Distribuidor → Sistema</td><td>produtos e quantidades</td>
+            <td><code>INSERT</code> em <code>pedido</code> (status "pendente") e em <code>pedido_produto</code> (um registro por produto).</td></tr>
+          <tr><td>3. Verificação de estoque</td><td>Sistema ← Estoque</td><td>qt_lote por produto</td>
+            <td><code>SELECT</code> em <code>lote</code> somando <code>qt_lote</code> do produto e comparando com <code>qt_solicitada</code>. Disponível: segue para a etapa 4. Indisponível: segue para a etapa 6.</td></tr>
+          <tr><td>4. Faturamento</td><td>Sistema → Fiscal</td><td>número, data e valor da nota; id do pedido</td>
+            <td><code>INSERT</code> em <code>nota_fiscal</code> (1 por pedido) e geração da ficha de pagamento do pedido.</td></tr>
+          <tr><td>5. Pagamento e liberação</td><td>Distribuidor → Financeiro → Estoque</td><td>data, valor e forma do pagamento</td>
+            <td>Pago ou com acordo formal: <code>INSERT</code> em <code>pagamento</code>, <code>UPDATE</code> do status do pedido para "pago", separação dos produtos e depois "entregue". Sem pagamento ou acordo: pedido fica aguardando pagamento.</td></tr>
+          <tr><td>6. Reposição de estoque</td><td>Sistema → Distribuidor e Fábrica</td><td>produtos faltantes; pedido de reposição</td>
+            <td>Avisa o distribuidor, solicita à fábrica e registra <code>INSERT</code> em <code>compra</code> (vinculada a <code>fornecedor</code>).</td></tr>
+          <tr><td>7. Recebimento e entrada</td><td>Fornecedor → Estoque</td><td>NF de compra, produto, quantidade, validade</td>
+            <td>Confere a entrada da compra, <code>INSERT</code> em <code>lote</code> (com <code>id_compra</code>, <code>id_produto</code>, <code>qt_lote</code>, <code>dt_validade</code>) e atualiza a quantidade em estoque. Retorna à etapa 3.</td></tr>
+          <tr><td>8. Controle de validade</td><td>Estoque → Gestão</td><td>dt_validade dos lotes</td>
+            <td><code>SELECT</code> em <code>lote</code> por <code>dt_validade</code>; se próximo do vencimento, emite alerta de vencimento (relatório de validade).</td></tr>
+        </table>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="section">
+        <h2>3. Convenções</h2>
+        <p><strong>SGBD:</strong> MySQL 8 (InnoDB, necessário para chaves estrangeiras e transações).</p>
+        <p><strong>Codificação (charset):</strong> <code>utf8mb4</code>.</p>
+        <p><strong>Collation:</strong> <code>utf8mb4_0900_ai_ci</code> (padrão do MySQL 8).</p>
+        <p>
+          <strong>Justificativa:</strong> os dados contêm acentos e cedilha (endereços, razão social, nomes de produtos como "Máscara
+          Capilar"). O <code>utf8mb4</code> é o UTF-8 completo do MySQL (4 bytes por caractere); o antigo <code>utf8</code> do MySQL (utf8mb3) é limitado e está
+          obsoleto. A collation <code>utf8mb4_0900_ai_ci</code> é <em>accent-insensitive</em> e <em>case-insensitive</em>: a busca por "mascara"
+          encontra "Máscara", e "ltda" encontra "LTDA", o que reduz erros de digitação nas consultas dos funcionários. Como é a collation padrão do MySQL 8, evita
+          conflitos de comparação entre colunas e tabelas.
+        </p>
+        <p><strong>Nomenclatura:</strong> minúsculas, <code>snake_case</code>, sem acentos nem cedilha nos nomes físicos; tabelas no singular; cada coluna começa com um prefixo que indica seu tipo de informação.</p>
+        <p><strong>Prefixos utilizados (todos aparecem nas tabelas abaixo):</strong></p>
+        <ul class="conventions-list">
+          <li>id_ – Identificador (PK/FK)</li>
+          <li>nm_ – Nome</li>
+          <li>dt_ – Data</li>
+          <li>tp_ – Tipo</li>
+          <li>qt_ – Quantidade</li>
+          <li>vl_ – Valor monetário</li>
+          <li>nr_ – Número (CNPJ, telefone, nota)</li>
+          <li>ds_ – Descrição textual</li>
+          <li>st_ – Situação (status)</li>
+        </ul>
+      </section>
+
+      <!-- 4 -->
+      <section class="section">
+        <h2>4. Notação Formal</h2>
+        <p>As expressões de cada entidade seguem a notação de dicionário de dados (DeMarco/Yourdon):</p>
+        <table>
+          <tr><th>Símbolo</th><th>Significado</th><th>Exemplo</th></tr>
+          <tr><td><code>=</code></td><td>"é composto de"</td><td><code>PRODUTO = ...</code></td></tr>
+          <tr><td><code>+</code></td><td>"e" (junção de elementos)</td><td><code>id_produto + nm_produto</code></td></tr>
+          <tr><td><code>@</code></td><td>Identificador: campo-chave primária (PK). Se composta, <code>@(a + b)</code></td><td><code>@id_pedido</code></td></tr>
+          <tr><td><code>( )</code></td><td>Elemento opcional</td><td><code>(nr_telefone)</code></td></tr>
+          <tr><td><code>[ | ]</code></td><td>Seleção: um dos valores listados</td><td><code>[pendente | pago | entregue]</code></td></tr>
+          <tr><td><code>m{ }n</code></td><td>Repetição: de m a n ocorrências</td><td><code>1{PEDIDO_PRODUTO}n</code></td></tr>
+          <tr><td><code>→</code></td><td>Chave estrangeira (FK) apontando para a entidade referenciada</td><td><code>id_pedido → PEDIDO</code></td></tr>
+        </table>
+        <div class="formal">DISTRIBUIDOR = @id_distribuidor + nm_distribuidor + nr_cnpj + ds_endereco + (nr_telefone)
+PEDIDO = @id_pedido + dt_pedido + st_pedido + id_distribuidor → DISTRIBUIDOR
+st_pedido = [pendente | pago | entregue]
+PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada
+ITENS_DO_PEDIDO = PEDIDO + 1{PEDIDO_PRODUTO}n</div>
+        <p>
+          <strong>Leitura:</strong> DISTRIBUIDOR é composto de um identificador (@) <code>id_distribuidor</code>, e de um nome, e de um CNPJ, e de um
+          endereço, e, opcionalmente (parênteses), de um telefone. PEDIDO é composto do identificador <code>id_pedido</code>, e da data, e da situação, e do
+          <code>id_distribuidor</code>, que é chave estrangeira apontando para DISTRIBUIDOR; a situação é uma seleção: apenas pendente, pago ou entregue.
+          PEDIDO_PRODUTO tem como identificador a combinação (@ composto) de <code>id_pedido</code> e <code>id_produto</code>, ambos chaves estrangeiras, e mais a
+          quantidade solicitada. ITENS_DO_PEDIDO é um pedido junto de 1 a n registros de PEDIDO_PRODUTO (chaves { }): todo pedido tem ao menos um item.
+        </p>
+      </section>
+
+      <!-- 5 -->
+      <section class="section">
+        <h2>5. Estrutura das Entidades (Dicionário de Dados)</h2>
+        <p>Os nomes abaixo são os nomes físicos (prefixados), usados no SQL. Todas as colunas das tabelas são <code>NOT NULL</code>, exceto <code>nr_telefone</code> em DISTRIBUIDOR.</p>
+      </section>
+
+      <section class="entity">
+        <h3>01. Distribuidor</h3>
+        <p>Armazena os dados cadastrais dos distribuidores parceiros.</p>
+        <div class="formal">DISTRIBUIDOR = @id_distribuidor + nm_distribuidor + nr_cnpj + ds_endereco + (nr_telefone)</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Obrigatório</th><th>Significado</th></tr>
+          <tr><td><code>id_distribuidor</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único.</td></tr>
+          <tr><td><code>nm_distribuidor</code></td><td>VARCHAR(120)</td><td>Sim</td><td>Razão social.</td></tr>
+          <tr><td><code>nr_cnpj</code></td><td>VARCHAR(18)</td><td>Sim</td><td>CNPJ válido e único (formato 00.000.000/0000-00).</td></tr>
+          <tr><td><code>ds_endereco</code></td><td>VARCHAR(200)</td><td>Sim</td><td>Endereço.</td></tr>
+          <tr><td><code>nr_telefone</code></td><td>VARCHAR(20)</td><td>Não</td><td>Telefone.</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK(id_distribuidor) identifica a linha e é o destino da FK de pedido; UNIQUE(nr_cnpj) garante a regra de CNPJ único e acelera a busca por CNPJ na validação do cadastro.</p>
+      </section>
+
+      <section class="entity">
+        <h3>02. Produto</h3>
+        <p>Representa os produtos comercializados.</p>
+        <div class="formal">PRODUTO = @id_produto + nm_produto + tp_produto + vl_preco</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Obrigatório</th><th>Significado</th></tr>
+          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único.</td></tr>
+          <tr><td><code>nm_produto</code></td><td>VARCHAR(120)</td><td>Sim</td><td>Nome comercial.</td></tr>
+          <tr><td><code>tp_produto</code></td><td>VARCHAR(50)</td><td>Sim</td><td>Tipo do produto (ex.: Shampoo, Condicionador, Máscara Capilar).</td></tr>
+          <tr><td><code>vl_preco</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Preço de venda (maior que zero).</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK(id_produto), destino das FKs de pedido_produto e lote. Não há índice extra em nome ou tipo: o catálogo é pequeno e um índice a mais só aumentaria o custo de escrita.</p>
+      </section>
+
+      <section class="entity">
+        <h3>03. Pedido</h3>
+        <p>Formaliza a solicitação de compra realizada por um distribuidor.</p>
+        <div class="formal">PEDIDO = @id_pedido + dt_pedido + st_pedido + id_distribuidor → DISTRIBUIDOR
+st_pedido = [pendente | pago | entregue]</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
+          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do pedido.</td></tr>
+          <tr><td><code>dt_pedido</code></td><td>DATE</td><td>Sim</td><td>Data de criação do pedido.</td></tr>
+          <tr><td><code>st_pedido</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Situação do pedido (pendente, pago, entregue).</td></tr>
+          <tr><td><code>id_distribuidor</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Distribuidor responsável pelo pedido.</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK(id_pedido); índice em id_distribuidor, para listar rapidamente os pedidos de um distribuidor e acelerar o join (a FK exige índice no InnoDB); índice em st_pedido, para filtros frequentes como "pedidos pendentes" e "aguardando pagamento".</p>
+      </section>
+
+      <section class="entity">
+        <h3>04. Entidade associativa Pedido-Produto</h3>
+        <p>Resolve o relacionamento N:N entre pedidos e produtos e guarda a quantidade solicitada de cada item.</p>
+        <div class="formal">PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
+          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (PK, FK)</td><td>Pedido que contém o produto.</td></tr>
+          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (PK, FK)</td><td>Produto solicitado no pedido.</td></tr>
+          <tr><td><code>qt_solicitada</code></td><td>INTEGER</td><td>Sim</td><td>Quantidade do produto no pedido (maior que zero).</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK composta (id_pedido, id_produto): impede o mesmo produto duplicado no mesmo pedido e atende a busca dos itens de um pedido; índice em id_produto, porque a PK composta só ajuda consultas que começam por id_pedido, e este índice atende "em quais pedidos o produto aparece". Regra: CHECK (qt_solicitada &gt; 0).</p>
+      </section>
+
+      <section class="entity">
+        <h3>05. Nota Fiscal</h3>
+        <p>Documento fiscal emitido quando um pedido é faturado.</p>
+        <div class="formal">NOTA_FISCAL = @id_nf + nr_nf + dt_emissao + vl_nf + id_pedido → PEDIDO</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
+          <tr><td><code>id_nf</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único da nota fiscal.</td></tr>
+          <tr><td><code>nr_nf</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Número oficial da nota fiscal (único).</td></tr>
+          <tr><td><code>dt_emissao</code></td><td>DATE</td><td>Sim</td><td>Data de emissão da nota.</td></tr>
+          <tr><td><code>vl_nf</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor total faturado (maior que zero).</td></tr>
+          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Pedido relacionado à nota fiscal.</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK(id_nf); UNIQUE(id_pedido), que implementa a cardinalidade (0,1)–(1,1) do banco: um pedido não pode ter duas notas; UNIQUE(nr_nf), pois o número oficial não se repete.</p>
+      </section>
+
+      <section class="entity">
+        <h3>06. Pagamento</h3>
+        <p>Registra os pagamentos realizados para um pedido.</p>
+        <div class="formal">PAGAMENTO = @id_pagamento + dt_pagamento + vl_pagamento + tp_forma_pagamento + id_pedido → PEDIDO
+tp_forma_pagamento = [PIX | boleto | transferência]</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
+          <tr><td><code>id_pagamento</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do pagamento.</td></tr>
+          <tr><td><code>dt_pagamento</code></td><td>DATE</td><td>Sim</td><td>Data do pagamento.</td></tr>
+          <tr><td><code>vl_pagamento</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor pago (maior que zero).</td></tr>
+          <tr><td><code>tp_forma_pagamento</code></td><td>VARCHAR(30)</td><td>Sim</td><td>Forma utilizada (PIX, boleto, transferência etc.).</td></tr>
+          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Pedido referente ao pagamento.</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK(id_pagamento); índice em id_pedido, para somar os pagamentos de um pedido e conferir a quitação; índice em dt_pagamento, usado nos relatórios e conferências financeiras por período.</p>
+      </section>
+
+      <section class="entity">
+        <h3>07. Fornecedor</h3>
+        <p>Representa os fornecedores responsáveis pela produção dos itens comercializados.</p>
+        <div class="formal">FORNECEDOR = @id_fornecedor + nm_fornecedor + nr_cnpj + ds_endereco + nr_telefone</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
+          <tr><td><code>id_fornecedor</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único.</td></tr>
+          <tr><td><code>nm_fornecedor</code></td><td>VARCHAR(120)</td><td>Sim</td><td>Razão social.</td></tr>
+          <tr><td><code>nr_cnpj</code></td><td>VARCHAR(18)</td><td>Sim</td><td>CNPJ do fornecedor (válido e único).</td></tr>
+          <tr><td><code>ds_endereco</code></td><td>VARCHAR(200)</td><td>Sim</td><td>Endereço.</td></tr>
+          <tr><td><code>nr_telefone</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Telefone para contato.</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK(id_fornecedor); UNIQUE(nr_cnpj), que impede fornecedor duplicado e acelera a busca por CNPJ.</p>
+      </section>
+
+      <section class="entity">
+        <h3>08. Compra</h3>
+        <p>Representa as compras realizadas junto aos fornecedores.</p>
+        <div class="formal">COMPRA = @id_compra + dt_compra + vl_compra + id_fornecedor → FORNECEDOR</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
+          <tr><td><code>id_compra</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único da compra.</td></tr>
+          <tr><td><code>dt_compra</code></td><td>DATE</td><td>Sim</td><td>Data da compra.</td></tr>
+          <tr><td><code>vl_compra</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor total (maior que zero).</td></tr>
+          <tr><td><code>id_fornecedor</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Fornecedor responsável.</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK(id_compra), destino da FK de lote; índice em id_fornecedor, para listar as compras de cada fornecedor e acelerar o join.</p>
+      </section>
+
+      <section class="entity">
+        <h3>09. Lote</h3>
+        <p>Controla os lotes recebidos no estoque e sua rastreabilidade.</p>
+        <div class="formal">LOTE = @id_lote + id_compra → COMPRA + id_produto → PRODUTO + qt_lote + dt_validade</div>
+        <table>
+          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
+          <tr><td><code>id_lote</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do lote.</td></tr>
+          <tr><td><code>id_compra</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Compra de origem.</td></tr>
+          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Produto armazenado.</td></tr>
+          <tr><td><code>qt_lote</code></td><td>INTEGER</td><td>Sim</td><td>Quantidade disponível (maior que zero).</td></tr>
+          <tr><td><code>dt_validade</code></td><td>DATE</td><td>Sim</td><td>Data de validade do lote (igual ou posterior à data da compra).</td></tr>
+        </table>
+        <p><strong>Índices:</strong> PK(id_lote); índice em id_compra, para rastrear os lotes de uma compra; índice em id_produto, para somar o estoque disponível de um produto na verificação de disponibilidade do pedido; índice em dt_validade, base do relatório e do alerta de vencimento.</p>
+      </section>
+
+      <!-- 6 -->
+      <section class="section">
+        <h2>6. Log de Acesso (Metadado Operacional)</h2>
+        <p>
+          As tabelas do sistema utilizam o mecanismo de auditoria do MySQL 8 por meio do <code>audit_log</code>, registrando operações
+          de leitura, inserção, atualização e exclusão.
+        </p>
+        <p>
+          Os registros são utilizados para rastreabilidade das operações administrativas, financeiras e de estoque, permitindo auditoria
+          das alterações realizadas no banco.
+        </p>
+      </section>
+
+      <!-- 7 -->
+      <section class="section">
+        <h2>7. Controle de Acesso</h2>
+        <table>
+          <tr><th>Tabela</th><th>Ler</th><th>Inserir</th><th>Atualizar</th><th>Apagar</th></tr>
+          <tr><td>distribuidor</td><td>Comercial</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
+          <tr><td>produto</td><td>Comercial/Estoque</td><td>Administrativo</td><td>Administrativo</td><td>Administrativo</td></tr>
+          <tr><td>pedido</td><td>Comercial</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
+          <tr><td>pedido_produto</td><td>Comercial</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
+          <tr><td>nota_fiscal</td><td>Fiscal</td><td>Fiscal</td><td>Nenhum</td><td>Nenhum</td></tr>
+          <tr><td>pagamento</td><td>Financeiro</td><td>Financeiro</td><td>Financeiro</td><td>Administrativo</td></tr>
+          <tr><td>fornecedor</td><td>Compras</td><td>Compras</td><td>Compras</td><td>Administrativo</td></tr>
+          <tr><td>compra</td><td>Compras</td><td>Compras</td><td>Compras</td><td>Administrativo</td></tr>
+          <tr><td>lote</td><td>Estoque</td><td>Estoque</td><td>Estoque</td><td>Administrativo</td></tr>
+        </table>
+        <p>Este modelo segue as práticas de rastreabilidade e controle de acesso apresentadas no exemplo utilizado como referência, adaptadas ao contexto comercial da Unileste Comércio LTDA.</p>
+      </section>
+
+      <!-- 8 -->
+      <section class="section">
+        <h2>8. LGPD: Proteção de Dados Pessoais</h2>
+        <p><strong>Controlador:</strong> Unileste Comércio LTDA. (Lei nº 13.709/2018, LGPD).</p>
+        <h3>8.1 Classificação dos dados</h3>
+        <p>
+          Os distribuidores e fornecedores são <strong>pessoas jurídicas</strong>, e a LGPD protege dados de <strong>pessoa natural</strong>. Mesmo assim, nome/razão social,
+          CNPJ, endereço e telefone podem identificar uma pessoa quando o parceiro é MEI ou empresário individual, ou quando o telefone é de um contato
+          específico. Por precaução, esses campos são tratados como <strong>dados pessoais comuns</strong>. <strong>O banco não armazena dados sensíveis</strong>
+          (art. 5º, II: origem racial ou étnica, convicção religiosa, opinião política, saúde, vida sexual, dado genético ou biométrico etc.) nem dados de crianças.
+        </p>
+        <div class="scroll">
+        <table>
+          <tr><th>Tabela (atributos)</th><th>Tipo de dado</th><th>Sensível?</th><th>Base legal (art. 7º)</th><th>Retenção proposta</th></tr>
+          <tr><td>distribuidor (nm_distribuidor, nr_cnpj, ds_endereco, nr_telefone)</td><td>Cadastral; pessoal se MEI/empresário individual</td><td>Não</td><td>V – execução de contrato e procedimentos preliminares (relação comercial)</td><td>Durante a relação comercial + 5 anos</td></tr>
+          <tr><td>fornecedor (nm_fornecedor, nr_cnpj, ds_endereco, nr_telefone)</td><td>Cadastral; pessoal se empresário individual</td><td>Não</td><td>V – execução de contrato</td><td>Durante a relação comercial + 5 anos</td></tr>
+          <tr><td>pedido, pedido_produto</td><td>Transacional (vinculado ao distribuidor)</td><td>Não</td><td>V – execução de contrato</td><td>5 anos</td></tr>
+          <tr><td>nota_fiscal</td><td>Fiscal</td><td>Não</td><td>II – cumprimento de obrigação legal ou regulatória</td><td>5 anos (prazo tributário); sem exclusão pelo sistema</td></tr>
+          <tr><td>pagamento, compra</td><td>Financeiro</td><td>Não</td><td>V – execução de contrato; II – obrigação legal (registros contábeis e fiscais)</td><td>5 anos</td></tr>
+          <tr><td>produto, lote</td><td>Não pessoal</td><td>Não</td><td>Fora do escopo da LGPD</td><td>Operacional; manter para rastreabilidade de validade</td></tr>
+          <tr><td>audit_log</td><td>Registro de acessos dos usuários internos</td><td>Não</td><td>IX – legítimo interesse (segurança e prevenção a fraudes; art. 46)</td><td>12 meses</td></tr>
+        </table>
+        </div>
+        <h3>8.2 Retenção, eliminação e direitos</h3>
+        <p>
+          Terminada a finalidade e vencido o prazo de retenção, os dados cadastrais deixam de ser mantidos (eliminação ou anonimização, arts. 15 e 16). A
+          exceção é a guarda exigida por obrigação legal (art. 16, I), caso das notas fiscais e dos registros financeiros, que são conservados
+          pelo prazo tributário e depois descartados. Seguem-se os princípios de <strong>minimização</strong> (só se coleta o necessário ao processo, por isso telefone do distribuidor é opcional, art. 6º, III)
+          e de <strong>segurança</strong> (controle de acesso por perfil na seção 7 e auditoria na seção 6). O titular pode exercer os direitos do art. 18
+          (confirmação, acesso, correção, eliminação quando cabível) por solicitação à empresa.
+        </p>
+        <div class="note">Bases legais e prazos são <strong>propostas do grupo</strong> para o modelo acadêmico e devem ser confirmados com o contador e o jurídico da Unileste antes de uso real.</div>
+      </section>
+    </div>
+  </body>
+</html>
