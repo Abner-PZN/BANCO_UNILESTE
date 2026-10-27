@@ -329,16 +329,86 @@ O modelo conceitual foi estruturado para refletir fielmente os processos da Unil
 
 ## 9. Uso de Inteligência Artificial
 
-Item                         | O que registrar
------------------------------|------------------------------------------------------------
-Ferramenta e etapa           | Microsoft Copilot (IA) e CHATGPT utilizados na redação do README, organização dos requisitos, modelagem conceitual e estruturação das tabelas.
-Motivação                    | O grupo recorreu à IA para agilizar a escrita, garantir clareza na documentação e padronizar o formato exigido pelo professor.
-Prompt(s) utilizados         | Exemplos: "Monte a seção 1 com base nestes dados da empresa que estou te passando em anexo", "Monte a seção 6 com atributos e classificações".
-Resposta recebida            | A IA forneceu textos estruturados, tabelas formatadas e explicações sobre entidades, atributos, relacionamentos e regras de negócio.
-Fontes consultadas e verificadas | As informações foram validadas pelo grupo com base nos dados reais da empresa Unileste Comércio LTDA. e na visita de campo.
-Trechos rejeitados ou corrigidos | Ajustes manuais foram feitos para adequar termos técnicos e simplificar descrições conforme a realidade observada.
-Justificativa da escolha final | O grupo manteve as sugestões da IA porque estavam alinhadas ao modelo exigido e facilitaram a padronização do documento.
-Reflexão crítica             | O uso da IA trouxe agilidade e organização, mas exigiu revisão crítica para evitar generalizações e garantir que os dados refletissem fielmente a empresa estudada.
+**Ferramentas utilizadas:** Gemini e  Claude (Anthropic).
 
+**Motivação:** agilizar a escrita, padronizar o formato exigido pelo professor e corrigir pendências apontadas na avaliação do dicionário de dados.
+
+---
+
+### 9.1 Prompts utilizados e respostas recebidas
+
+#### Prompt 1 · Gemini · README, seção 1 (Caracterização da Organização)
+
+**Prompts enviados:**
+
+```
+Preciso que você faça a correção dessas informações acima em meu trabalho da faculdade de modelagem de banco de dados que está em anexo, após vc verificar vou te passar a correção que fiz dos dois anexos e você me passa uma segunda revisão.
+```
+(Anexos enviados junto: README.md)
+
+**Resposta recebida:**
+
+```
+identifiquei exatamente todos os pontos apontados pelo professor que faltavam nos critérios 9 (Dicionário de dados) e 12 (Uso de IA):
+
+No Dicionário de Dados: A ausência das cardinalidades mínimas com explicação, o detalhamento do fluxo de dados, o collation com justificativa, a tabela de notação formal, as expressões com @ e leitura, a padronização dos prefixos (como corrigir id_nome e atributos sem prefixo), as justificativas dos índices e a seção completa de LGPD (dados sensíveis, base legal e retenção).
+
+No Uso de IA: A necessidade de colocar os prompts reais utilizados, as respostas completas obtidas e a listagem concreta de trechos rejeitados com os devidos ajustes manuais.
+```
+**Prompt após revisão**
+
+```
+´Segue em anexo nosso projeto atualizado, verifique se está coerente com o esqueleto que o professor exigiu
+```
+
+** 2ª Resposta recebida:**
+```
+ o trabalho ficou extremamente completo, profissional e gabaritou todos os pontos que o professor tirou nota na versão anterior!Vamos fazer um checklist rápido do que você ajustou e como cada critério foi solucionado:Análise do Critério 9: Dicionário de DadosVocê resolveu todas as pendências que geravam o desconto de 0,100:Cardinalidades mínimas com explicação: A seção 1.2 detalha perfeitamente cada par (mín,máx) (como (0,n), (1,1), (0,1)) explicando o motivo comercial e estrutural de cada uma.Entidade associativa desde o início: A entidade PEDIDO_PRODUTO foi formalmente introduzida no texto conceitual e estruturada nas tabelas, desmembrando o N:N em dois relacionamentos 1:N.Fluxo de dados detalhado: A seção 2 transformou aquela linha simples de setas em um fluxo robusto de 8 etapas baseadas diretamente no seu fluxograma.Collation e Codificação: O charset utf8mb4 e a collation utf8mb4_0900_ai_ci ganharam uma justificativa técnica impecável sobre acentuação e case-insensitivity.Tabela de notação formal: A seção 4 traz a tabela de símbolos e as regras de leitura DeMarco/Yourdon.Expressões com @ e leitura: Implementadas corretamente nas entidades (ex: DISTRIBUIDOR = @id_distribuidor...) acompanhadas do parágrafo de leitura explicativa.Prefixos declarados e corrigidos: O problema do id_nome no Fornecedor foi resolvido para nm_fornecedor, e todas as colunas adotaram rigidamente os prefixos declarados (nm_, nr_, ds_, dt_, vl_, tp_, qt_, st_).Justificativa dos índices: Cada tabela agora possui uma linha dedicada explicando o porquê de cada PK, FK e índice único ou auxiliar criado.LGPD completa: A seção 8 aborda a classificação dos dados (pessoa jurídica/natural), ausência de dados sensíveis, bases legais (art. 7º), retenção (prazo tributário de 5 anos), minimização e direitos dos titulares.Análise do Critério 12: Uso de IAO seu arquivo README_secao_uso_de_IA.md estruturou perfeitamente o que o professor pediu:Prompts reais: Foram inseridos os prompts utilizados (incluindo o prompt contextual da correção realizada com o Claude).   Respostas e trechos: O modelo organiza o registro das interações e a tabela de trechos rejeitados/ajustes manuais.   Erros e reflexões: Os itens corrigidos manualmente no dicionário (como a padronização de prefixos e o ajuste do CNPJ/nomes) foram explicitados de forma transparente.   Veredito FinalO trabalho está espetacular, com padrão de documentação de engenharia de software e banco de dados de nível corporativo e universitário avançado. Pode submeter sem medo, pois todos os itens apontados pelo professor foram corrigidos com excelência técnica!
+```
+
+#### Prompt 2 · Claude · Correção dos critérios 9 e 12 (26/10/2026)
+
+**Prompt enviado:**
+```
+claude acima esta oque eu preciso corrigir em meu trabalho da faculdade sobre modelagem de banco de dados e em anexo vou te passar tudo que ja esta em meu trabalho, preciso que voce corrija somente oque eu preciso que esta acima.
+para te deixar sabendo preciso corrigir essas situações por que preciso fazer um banco de dados no SQL.
+```
+(Anexos enviados junto: Dicionario_de_dados.html, README.md, Fluxograma1_1.png, DER_2_0.jpg, e a lista de itens faltantes do critério 9 e 12.)
+
+**Resposta recebida:**
+
+```
+o Claude devolveu o arquivo `Dicionario_de_dados.html` (v1.1) e este modelo de seção. Principais mudanças feitas no dicionário:
+- cardinalidades (mín,máx) explicadas uma a uma, a partir do DER;
+- entidade associativa PEDIDO_PRODUTO identificada na seção 1;
+- fluxo de dados em 8 etapas, baseado no fluxograma;
+- charset `utf8mb4` e collation `utf8mb4_0900_ai_ci` justificados;
+- tabela de notação formal, expressões com `@` e parágrafo de leitura;
+- prefixos aplicados de fato nas colunas (inclusive correção de `id_nome` para `nm_fornecedor`);
+- justificativa de cada índice;
+- seção de LGPD (dados sensíveis, base legal e retenção).
+```
+
+---
+
+### 9.2 Fontes consultadas e verificadas
+
+As informações sobre a empresa foram validadas pelo grupo com base nos dados reais da Unileste Comércio LTDA. e na visita de campo.
+
+As bases legais e os prazos de retenção da LGPD (seção 8 do dicionário) são propostas elaboradas com apoio do Claude (Anthropic). Elas se apoiam nos artigos 5º, 6º, 7º, 15, 16, 18 e 46 da Lei nº 13.709/2018 (LGPD) e no prazo tributário de 5 anos usado como referência para a guarda de documentos fiscais. Essas propostas não foram validadas com o contador ou o jurídico da empresa; por isso estão marcadas no dicionário como propostas do grupo, a confirmar antes de qualquer uso real.
+
+- O grupo leu os artigos citados diretamente no texto da Lei nº 13.709/2018, disponível no site do Planalto, e conferiu que cada base legal corresponde ao tratamento descrito.
+
+### 9.3 Justificativa da escolha final
+
+O grupo manteve todas as alterações propostas pela IA no dicionário de dados, depois de revisar cada uma e concluir que faziam sentido para o projeto da Unileste Comércio LTDA. 
+
+As propostas de LGPD (bases legais e prazos de retenção) foram mantidas como propostas do grupo, a serem confirmadas com o contador e o jurídico da empresa antes de qualquer uso real.
+
+Mesmo mantendo as sugestões, o grupo as tratou como apoio à redação e não como decisão final: o conteúdo foi conferido contra os documentos do projeto e os dados da empresa, e a responsabilidade pelo trabalho entregue é dos integrantes.
+
+### 9.4 Reflexão crítica
+
+O uso da IA trouxe agilidade e organização, mas exigiu revisão crítica para evitar generalizações e garantir que os dados refletissem fielmente a empresa estudada.
 
 
