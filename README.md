@@ -36,7 +36,7 @@ Foram identificadas dificuldades no controle das fichas de pagamento dos distrib
    - **Fotos:**
     ![Foto da fachada](Docs/FotoFachada.jpeg)
     ![Foto do estoque](Docs/FotoEstoque.jpg)
-    ![Foto da recepção](Docs/FotoRecepção.jpg)
+    ![Foto da recepção](Docs/FotoRecepção.jpeg)
      
     
 ---
