@@ -14,17 +14,27 @@
 A organização escolhida é a Unileste Comércio LTDA., empresa de médio porte do setor de cosméticos e produtos capilares. A empresa atua com duas marcas comerciais — Tutti Capelli e Outlet Hair — que representam linhas distintas de produtos e pontos de venda, mas estão sob a mesma gestão administrativa e jurídica.
 
 - **Contexto e porte:** 
-A empresa possui fins lucrativos e conta atualmente com 9 funcionários diretos e cerca de 90 distribuidores que revendem seus produtos para salões de cabeleireiro. Os produtos são terceirizados — produzidos por fábricas parceiras — e comercializados exclusivamente para distribuidores, que fazem a revenda final.
+A empresa possui fins lucrativos á mais de 20 anos no mercado e conta atualmente com 9 funcionários diretos e cerca de 90 distribuidores que revendem seus produtos para salões de cabeleireiro. Os produtos são terceirizados — produzidos por fábricas parceiras — e comercializados exclusivamente para distribuidores, que fazem a revenda final.
+Volume de atividade: Tem em média 500 pedidos por mês, atualmente conta com 99 produtos no catálogo, e realiza em torno de 50 compras por mês.
 
 - **Problemas e necessidades identificados:**
 Foram identificadas dificuldades no controle das fichas de pagamento dos distribuidor, além da ausência de um sistema eficiente para monitorar o estoque, especialmente em relação à validade dos produtos e à quantidade disponível.
+ 1. **Fichas de pagamento dos distribuidores** sem controle centralizado: é difícil saber, para cada pedido, o que foi pago, o que está em aberto e o que foi liberado por acordo com o gerente.
+ 2. **Estoque sem controle de validade:** o estoque é acompanhado por quantidade, mas a validade de cada lote não é monitorada de forma sistemática, o que traz risco de vender ou manter produto vencido (cosmético).
+ 3. **Falta de aviso de estoque baixo:** a reposição depende da percepção dos funcionários; quando falta produto, o distribuidor é avisado depois do pedido.
+ 4. **Rastreabilidade fraca entre compra, lote e venda:** não há registro único ligando a compra feita à fábrica, o lote recebido e os pedidos que consumiram esse lote.
 
-- **Justificativa da escolha:**
-A Unileste Comércio LTDA. está consolidada há mais de 20 anos no mercado, demonstrando solidez, experiência e capacidade de adaptação às mudanças do setor. Além disso, a empresa se destaca pelo desenvolvimento de metodologias inovadoras e produtos exclusivos, o que reforça sua relevância como caso de estudo para este projeto.
+**Necessidade:** um sistema que registre distribuidores, pedidos, notas, pagamentos, entregas, compras e lotes de forma integrada, com validade e estoque sob controle.
+
+- **Justificativa da escolha:** o grupo tem acesso direto à empresa para pesquisa de campo pois um dos integrantes do grupo trabalha nessa empresa, O porte é adequado ao projeto: o ciclo completo do negócio (comprar da fábrica, estocar por lote com validade, vender a distribuidor, faturar, cobrar) gera 10 entidades relacionadas, o suficiente para exercitar relacionamentos 1:N, N:N com entidade associativa e 1:1 opcional, sem ser complexo demais para a primeira etapa. A venda exclusivamente B2B (CNPJ) e o controle de validade são regras reais e específicas que enriquecem o modelo.
 
 - **Evidências da organização:**
-O grupo possui evidências concretas de acesso à organização, incluindo endereço, contatos e registros fotográficos da visita, que comprovam a existência e a participação direta no levantamento de requisitos.
 
+  - **Endereço completo:** Rua Arraial de São Bartolomeu 944
+  - **Link (site / rede social):** https://tutticapelli.com.br/ | https://www.instagram.com/tutticapelliprofessional/
+  - **Contato e responsável:** Alfredo Veronezi Gomides, Gerente,  11 98104-9575.
+   - **Fotos:**
+    ![Foto da fachada](Docs/evidencias/visita_1.jpg)
 ---
 
 # 2. Processos de Negócio
