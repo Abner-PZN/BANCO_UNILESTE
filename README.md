@@ -34,7 +34,11 @@ Foram identificadas dificuldades no controle das fichas de pagamento dos distrib
   - **Link (site / rede social):** https://tutticapelli.com.br/ | https://www.instagram.com/tutticapelliprofessional/
   - **Contato e responsável:** Alfredo Veronezi Gomides, Gerente,  11 98104-9575.
    - **Fotos:**
-    ![Foto da fachada](Docs/evidencias/visita_1.jpg)
+    ![Foto da fachada](Docs/FotoFachada.jpeg)
+    ![Foto do estoque](Docs/FotoEstoque.jpg)
+    ![Foto da recepção](Docs/FotoRecepção.jpg)
+     
+    
 ---
 
 # 2. Processos de Negócio
