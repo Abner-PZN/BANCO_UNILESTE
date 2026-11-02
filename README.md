@@ -43,19 +43,79 @@ Foram identificadas dificuldades no controle das fichas de pagamento dos distrib
 
 # 2. Processos de Negócio
 
-## Principais processos mapeados: 
+A Unileste opera em três grupos de processos: Vendas (do cadastro do distribuidor ao pós-venda), Compras (da fábrica ao estoque) e Apoio (estoque, validade e gestão). Cada processo abaixo traz o que acontece, quem participa, o que entra e o que sai, e quais dados do modelo ele usa.
 
-- **Cadastro de distribuidores:** registro de novos parceiros que revendem os produtos da empresa.
-
-- **Controle de estoque:** monitoramento da quantidade de produtos disponíveis e das datas de validade.
-
-- **Emissão de pedidos:** geração de pedidos de compra pelos distribuidores, com conferência de disponibilidade em estoque.
-
-- **Controle de pagamentos:** acompanhamento das fichas de pagamento dos distribuidores, garantindo que os registros estejam atualizados.
-
-- **Entregas:** organização da logística de envio dos produtos aos distribuidores.
-
-- **Processo de compras:** aquisição de produtos junto às fábricas terceirizadas, garantindo o abastecimento contínuo do estoque.
+## 2.1 Processos de Vendas
+ 
+### P1. Cadastro de distribuidores
+- **Descrição:** o interessado em revender os produtos envia os dados da empresa. A equipe comercial confere se é pessoa jurídica (CNPJ válido e ainda não cadastrado) e, aprovado, registra o distribuidor com endereço e telefone. Consumidor final não é cadastrado, pois a empresa vende exclusivamente a distribuidores.
+- **Participantes:** equipe comercial, gerente.
+- **Entrada → Saída:** dados e CNPJ do interessado → distribuidor ativo, apto a fazer pedidos.
+- **Dados usados:** Distribuidor.
+### P2. Tabela de preços e condições comerciais
+- **Descrição:** a gerência define o preço de venda de cada produto e as condições comerciais: pedido mínimo, faixas de desconto por volume, limite de crédito e prazo de pagamento do distribuidor. Quando o preço muda, a nova tabela passa a valer a partir de uma data e não altera pedidos já emitidos. O preço praticado é gravado em cada item do pedido.
+- **Participantes:** gerente.
+- **Entrada → Saída:** custo de compra, política comercial → tabela de preços vigente e condições por distribuidor.
+- **Dados usados:** Produto (preço), Distribuidor, item do Pedido (preço praticado).
+### P3. Emissão de pedido com conferência de estoque
+- **Descrição:** o distribuidor solicita os produtos e a equipe registra o pedido, item por item. O sistema confere o estoque disponível (priorizando lotes de validade mais próxima), aplica preço e desconto da tabela vigente e confere pedido mínimo e limite de crédito. Itens sem estoque não podem ser vendidos. O pedido fica "pendente" até a liberação do P5.
+- **Participantes:** equipe comercial, distribuidor.
+- **Entrada → Saída:** solicitação do distribuidor → pedido registrado com itens, quantidades e preços.
+- **Dados usados:** Pedido, Pedido–Produto, Produto, Lote, Distribuidor.
+### P4. Faturamento e emissão de nota fiscal
+- **Descrição:** com o pedido liberado, a equipe confere se todos os dados do distribuidor e dos itens estão completos (CNPJ, endereço, produtos, quantidades, valores e impostos) e emite a nota fiscal conforme as normas fiscais vigentes. A nota é vinculada ao pedido (0:1: um pedido ainda não liberado não tem nota) e o valor da nota deve bater com o total do pedido. A nota acompanha a mercadoria na entrega e uma cópia é arquivada por 5 anos.
+- **Participantes:** equipe administrativo-financeira.
+- **Entrada → Saída:** pedido liberado → nota fiscal emitida e arquivada.
+- **Dados usados:** Nota Fiscal, Pedido, Distribuidor.
+### P5. Controle de pagamentos
+- **Descrição:** cada pagamento do distribuidor é registrado na ficha, com data, valor e forma (boleto, transferência etc.), vinculado ao pedido. O pedido só é liberado se estiver pago ou se o gerente financeiro autorizar pagamento futuro (acordo). Pedidos com acordo ficam marcados como "em aberto" até a quitação, e a equipe acompanha os vencimentos.
+- **Participantes:** equipe financeira, gerente financeiro.
+- **Entrada → Saída:** pagamento ou acordo → pedido liberado e saldo do distribuidor atualizado.
+- **Dados usados:** Pagamento, Pedido, Distribuidor.
+### P6. Entrega aos distribuidores
+- **Descrição:** com o pedido liberado e a nota fiscal emitida, a equipe separa os produtos (respeitando FEFO), embala, confere os itens contra o pedido e despacha com a nota. O pedido passa a "entregue" quando o distribuidor recebe.
+- **Participantes:** equipe de expedição/estoque.
+- **Entrada → Saída:** pedido liberado + nota fiscal → mercadoria entregue e baixa no estoque.
+- **Dados usados:** Pedido, Lote, Nota Fiscal.
+### P7. Devolução e troca
+- **Descrição:** quando o distribuidor recebe produto com avaria, vencido ou diferente do pedido, comunica a empresa dentro do prazo. A equipe registra a devolução com o motivo, a nota fiscal de origem e o lote, confere o produto devolvido e o gerente decide entre troca, crédito ou estorno. Produto avariado ou vencido não volta ao estoque vendável. Em caso de problema recorrente no mesmo lote, a empresa avisa a fábrica.
+- **Participantes:** distribuidor, equipe comercial, gerente e estoque.
+- **Entrada → Saída:** solicitação do distribuidor → devolução registrada, produto trocado ou crédito/estorno, estoque ajustado.
+- **Dados usados:** Pedido, Nota Fiscal, Lote, Produto (sugestão de entidade futura: Devolução).
+## 2.2 Processos de Compras
+ 
+### P8. Cadastro de fornecedores (fábricas)
+- **Descrição:** antes de comprar, a fábrica parceira é cadastrada com nome, CNPJ válido e único, endereço e telefone de contato. Só fornecedores cadastrados e ativos podem receber ordens de compra. A empresa mantém dados atualizados porque toda a produção é terceirizada.
+- **Participantes:** setor de compras, gerente.
+- **Entrada → Saída:** dados da fábrica → fornecedor ativo apto a receber compras.
+- **Dados usados:** Fornecedor.
+### P9. Compra junto às fábricas
+- **Descrição:** a partir da lista de produtos em estoque baixo e da demanda dos pedidos, o setor de compras emite a compra à fábrica, informando produtos, quantidades, preço e prazo de entrega. São cerca de 50 compras por mês. Cada compra fica registrada com data, fornecedor e valor.
+- **Participantes:** setor de compras, gerente.
+- **Entrada → Saída:** necessidade de reposição → compra registrada e enviada à fábrica.
+- **Dados usados:** Compra, Fornecedor, Produto.
+### P10. Recebimento da mercadoria e entrada de lotes
+- **Descrição:** quando a fábrica entrega, a equipe confere a mercadoria contra a compra e a nota do fornecedor: produto, quantidade, número do lote, validade e integridade das embalagens. Se estiver correto, cada lote é registrado vinculado à compra de origem, com número, validade e quantidade, e só então os produtos entram no estoque. Divergências (falta, avaria, validade curta) são registradas e comunicadas à fábrica antes da entrada.
+- **Participantes:** equipe de estoque, setor de compras.
+- **Entrada → Saída:** mercadoria + documentos da fábrica → lotes registrados e estoque atualizado (ou divergência registrada).
+- **Dados usados:** Lote, Compra, Produto.
+### P11. Contas a pagar às fábricas
+- **Descrição:** cada compra gera uma obrigação de pagamento à fábrica, com valor e vencimento acordados. O financeiro controla os vencimentos, registra a data e a forma do pagamento e mantém a compra como "em aberto" até a quitação. O pagamento só deve ser feito após o recebimento e conferência da mercadoria.
+- **Participantes:** setor financeiro, gerente financeiro.
+- **Entrada → Saída:** compra recebida e conferida → pagamento efetuado e registrado.
+- **Dados usados:** Compra, Fornecedor (sugestão de entidade futura: Pagamento de compra).
+## 2.3 Processos de Apoio
+ 
+### P12. Controle de estoque e validade
+- **Descrição:** o estoque é controlado por lote, com quantidade e validade. A cada entrada (P10) e saída (P6, P7) a quantidade é atualizada. O sistema sinaliza produtos com estoque abaixo do mínimo e lotes próximos do vencimento, e emite relatório de validade. Lote vencido é bloqueado para venda.
+- **Participantes:** equipe de estoque.
+- **Entrada → Saída:** movimentações de entrada e saída → saldo atualizado, alertas de reposição e de validade.
+- **Dados usados:** Lote, Produto.
+### P13. Gestão de pessoal e de vendas por marca
+- **Descrição:** a empresa tem 9 funcionários e duas marcas comerciais (Tutti Capelli e Outlet Hair). A gerência acompanha as vendas por marca (qual marca vende mais, para quais distribuidores) e a atuação da equipe, usando os pedidos emitidos, para definir reposição, ações comerciais e distribuição de tarefas.
+- **Participantes:** gerente, funcionários.
+- **Entrada → Saída:** pedidos e vendas do período → relatório de vendas por marca e por funcionário.
+- **Dados usados:** Pedido, Produto (sugestão de entidades futuras: Marca e Funcionário).
 
 ## Fluxograma:  
 
@@ -103,21 +163,67 @@ O fluxograma abaixo representa os processos integrados da Unileste Comércio LTD
 
 # 4. Regras de Negócio
 
-- **Regras operacionais:**
-
-O sistema deve emitir aviso quando o estoque de um produto estiver esgotado ou prestes a se esgotar.
-
-Para que uma nota fiscal seja gerada, é obrigatório que todos os dados estejam preenchidos e que o produto esteja disponível em estoque.
-
-Um pedido só pode ser liberado mediante pagamento ou mediante acordo formal com o gerente financeiro para pagamento futuro.
-
-- **Restrições organizacionais:**
-
-A liberação de pedidos está condicionada às políticas internas de pagamento, que exigem quitação imediata ou autorização do gerente financeiro.
-
-O controle de estoque deve atender às exigências legais de validade dos produtos, garantindo que nenhum item vencido seja comercializado.
-
-A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigentes, assegurando conformidade com a legislação.
+## 4.1 Regras operacionais
+ 
+### Cadastro
+ 
+| ID | Regra |
+| --- | --- |
+| RN01 | A empresa vende **exclusivamente a distribuidores**, que são pessoas jurídicas. Não há venda ao consumidor final, e só distribuidor cadastrado e ativo pode fazer pedido. |
+| RN02 | Todo distribuidor e todo fornecedor deve ter **CNPJ válido** (14 dígitos com dígitos verificadores corretos) e **único**: não pode existir dois cadastros com o mesmo CNPJ. |
+ 
+### Pedido e condições comerciais
+ 
+| ID | Regra |
+| --- | --- |
+| RN03 | Não se vende produto sem **estoque disponível**: a quantidade pedida não pode exceder a quantidade em lotes válidos. |
+| RN04 | O valor total de um pedido não pode ser inferior ao **pedido mínimo** de R$50,00 . Exceções só com autorização do gerente. |
+| RN05 | O preço de cada item é o da **tabela de preços vigente na data do pedido** e fica gravado no item, de modo que mudanças posteriores de preço não alteram pedidos já emitidos. |
+| RN06 | Cada distribuidor tem um **limite de crédito** de R$1.000,00 e um **prazo máximo de pagamento** de até o fechamento do mês Se o saldo em aberto somado ao novo pedido ultrapassar o limite, o pedido só é liberado com autorização do gerente financeiro. |
+| RN07| Um pedido só é **liberado** mediante pagamento ou mediante acordo formal com o gerente financeiro para pagamento futuro. |
+ 
+### Faturamento
+ 
+| ID | Regra |
+| --- | --- |
+| RN08 | A **nota fiscal** só pode ser emitida com todos os dados obrigatórios preenchidos e conforme as normas fiscais e tributárias vigentes. |
+| RN09 | Todo pedido liberado gera uma única nota fiscal, e cada nota pertence a um único pedido. O valor da nota é igual ao total do pedido. |
+ 
+### Estoque
+ 
+| ID | Regra |
+| --- | --- |
+| RN10 | É **proibido vender produto vencido**. Lote com validade ultrapassada fica bloqueado para venda. |
+| RN11 | A saída de produtos segue o critério **FEFO** (*First Expired, First Out*): sai primeiro o lote com validade mais próxima do vencimento. |
+| RN12 | Todo produto tem um **estoque mínimo** definido. Quando a quantidade disponível fica igual ou abaixo desse mínimo, o produto entra na lista de reposição e deve ser incluído no próximo pedido de compra. *(Reescrita da antiga regra "O sistema deve emitir aviso…", que era um requisito: o aviso em si passa a constar apenas na Seção 3.)* |
+| RN13 | Lote com validade restante inferior a 30 é considerado de **validade crítica**: só é vendido com ciência do distribuidor ou autorização do gerente. |
+ 
+### Devolução e troca (pós-venda)
+ 
+| ID | Regra |
+| --- | --- |
+| RN14 | A **devolução ou troca** só é aceita nos casos de produto avariado, vencido ou divergente do pedido, e deve ser solicitada em até 30 dias após o recebimento. |
+| RN15 | Toda devolução deve ser registrada com **motivo, nota fiscal e lote de origem**. Produto devolvido por avaria ou vencimento não retorna ao estoque vendável. |
+| RN16 | A devolução aceita resulta em troca do produto, crédito para o distribuidor ou estorno, por decisão do gerente. |
+ 
+### Compras e recebimento
+ 
+| ID | Regra |
+| --- | --- |
+| RN17 | Compras só podem ser feitas a **fornecedores cadastrados e ativos**. |
+| RN18 | Toda mercadoria recebida da fábrica passa por **conferência no recebimento**: produto, quantidade, número do lote, validade e integridade, contra a compra e a nota do fornecedor. Divergências são registradas e comunicadas à fábrica. |
+| RN19 | Só entra no estoque o produto **conferido e aprovado**. Todo lote tem número, validade e **uma única compra de origem**. |
+| RN20 | Cada compra gera uma obrigação de pagamento à fábrica com vencimento definido. O pagamento só é feito após a conferência da mercadoria recebida. |
+ 
+## 4.2 Restrições organizacionais e legais
+ 
+| ID | Restrição |
+| --- | --- |
+| RN21 | A liberação de pedidos está condicionada às políticas internas de pagamento, que exigem quitação imediata ou autorização do gerente financeiro. |
+| RN22 | O controle de estoque deve atender às exigências legais de validade dos produtos, garantindo que nenhum item vencido seja comercializado. |
+| RN23 | A emissão de notas fiscais deve seguir as normas fiscais e tributárias vigentes, e os documentos fiscais são guardados por **5 anos**. |
+| RN24 | Só podem ser comercializados cosméticos **regularizados na ANVISA** (notificação ou registro, conforme o grau de risco do produto) e com rotulagem conforme a regulamentação vigente (incluindo lote e validade). |
+| RN25 | Os **dados de contato** de distribuidores e fornecedores (inclusive de pessoas físicas responsáveis) devem ser tratados conforme a **LGPD** (Lei nº 13.709/2018): uso apenas para as finalidades do negócio (venda, cobrança, entrega, emissão fiscal), acesso restrito a quem precisa e guarda pelo prazo necessário. |
 
 ---
 
