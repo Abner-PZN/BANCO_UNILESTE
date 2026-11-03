@@ -35,23 +35,23 @@
       .scroll { overflow-x:auto; }
     </style>
   </head>
-
+ 
   <body>
     <div class="container">
       <header>
         <h1>DICIONÁRIO DE DADOS</h1>
         <p>UNILESTE COMÉRCIO LTDA.</p>
       </header>
-
+ 
       <div class="metrics">
         <div class="metric"><strong>08</strong>Entidades</div>
         <div class="metric"><strong>01</strong>Associativa</div>
         <div class="metric"><strong>07</strong>Relacionamentos</div>
-        <div class="metric"><strong>40</strong>Atributos</div>
+        <div class="metric"><strong>42</strong>Atributos</div>
         <div class="metric"><strong>MySQL 8</strong>SGBD</div>
-        <div class="metric"><strong>v1.1</strong>26/out/2026</div>
+        <div class="metric"><strong>v1.3</strong>02/nov/2026</div>
       </div>
-
+ 
       <!-- 1 -->
       <section class="section">
         <h2>1. Modelo Conceitual</h2>
@@ -59,17 +59,17 @@
           Este modelo representa o processo comercial da Unileste Comércio LTDA., responsável pela venda de produtos a
           distribuidores, emissão de notas fiscais, controle de pagamentos e rastreabilidade dos lotes adquiridos junto aos fornecedores.
         </p>
-
+ 
         <h3>1.1 Entidade associativa identificada: PEDIDO_PRODUTO</h3>
         <p>
           O único relacionamento N:N do modelo é <strong>Pedido – Produto</strong> (relacionamento "Contém" no DER): um pedido tem
           vários produtos e um produto aparece em vários pedidos. Como o modelo relacional não representa N:N diretamente, ele é
-          resolvido <strong>desde o modelo conceitual</strong> pela entidade associativa <code>PEDIDO_PRODUTO</code>, que guarda o
-          atributo do relacionamento (<code>qt_solicitada</code>) e tem chave primária composta pelas duas chaves estrangeiras
+          resolvido <strong>desde o modelo conceitual</strong> pela entidade associativa <code>PEDIDO_PRODUTO</code>, que guarda os
+          atributos do relacionamento (<code>qt_solicitada</code> e <code>vl_preco_praticado</code>, o preço do item na data do pedido) e tem chave primária composta pelas duas chaves estrangeiras
           (<code>id_pedido</code> + <code>id_produto</code>). Assim, N:N vira dois relacionamentos 1:N:
           PEDIDO 1:N PEDIDO_PRODUTO e PRODUTO 1:N PEDIDO_PRODUTO.
         </p>
-
+ 
         <h3>1.2 Cardinalidades (mínima, máxima)</h3>
         <p>
           Notação <code>(mín,máx)</code> lida do lado da entidade, como no DER. <strong>Mínimo 0</strong> = participação opcional (a
@@ -95,13 +95,13 @@
             <strong>(1,1)</strong>: toda nota pertence a exatamente um pedido (<code>id_pedido</code> NOT NULL + UNIQUE).</td>
           </tr>
           <tr>
-            <td>Pedido <em>contém</em> Produto <br>(via PEDIDO_PRODUTO)</td><td>Pedido <code>(1,n)</code></td><td>Produto <code>(1,n)</code></td>
+            <td>Pedido <em>contém</em> Produto <br>(via PEDIDO_PRODUTO)</td><td>Pedido <code>(1,n)</code></td><td>Produto <code>(0,n)</code></td>
             <td><strong>Pedido (1,n)</strong>: pedido sem item não tem sentido; tem ao menos um produto e pode ter vários.
-            <strong>Produto (1,n)</strong>: conforme o DER, o produto do catálogo está associado a ao menos um pedido e pode estar em vários.</td>
+            <strong>Produto (0,n)</strong>: o catálogo tem 99 produtos e um produto recém-cadastrado ainda não foi pedido por ninguém; depois pode aparecer em vários pedidos.</td>
           </tr>
           <tr>
-            <td>Produto <em>pertence</em> a Lote</td><td>Produto <code>(1,n)</code></td><td>Lote <code>(1,1)</code></td>
-            <td><strong>(1,n)</strong>: o produto tem ao menos um lote em estoque e pode ter vários, com validades diferentes.
+            <td>Produto <em>pertence</em> a Lote</td><td>Produto <code>(0,n)</code></td><td>Lote <code>(1,1)</code></td>
+            <td><strong>(0,n)</strong>: o produto pode estar no catálogo sem lote (ainda não comprado da fábrica ou estoque esgotado) e pode ter vários lotes, com validades diferentes.
             <strong>(1,1)</strong>: cada lote é de exatamente um produto (<code>id_produto</code> NOT NULL).</td>
           </tr>
           <tr>
@@ -123,7 +123,7 @@
           por regra de aplicação, transação ou <code>TRIGGER</code>.
         </div>
       </section>
-
+ 
       <!-- 2 -->
       <section class="section">
         <h2>2. Fluxo de Dados</h2>
@@ -134,15 +134,15 @@
           <tr><td>1. Cadastro e validação</td><td>Distribuidor → Sistema</td><td>nome, CNPJ, endereço, telefone</td>
             <td>Valida CNPJ. Se inválido, solicita correção e volta a "Receber dados". Se válido: <code>INSERT</code> em <code>distribuidor</code>.</td></tr>
           <tr><td>2. Solicitação de pedido</td><td>Distribuidor → Sistema</td><td>produtos e quantidades</td>
-            <td><code>INSERT</code> em <code>pedido</code> (status "pendente") e em <code>pedido_produto</code> (um registro por produto).</td></tr>
+            <td><code>INSERT</code> em <code>pedido</code> (status "pendente") e em <code>pedido_produto</code> (um registro por produto, gravando <code>qt_solicitada</code> e o preço vigente do produto em <code>vl_preco_praticado</code>).</td></tr>
           <tr><td>3. Verificação de estoque</td><td>Sistema ← Estoque</td><td>qt_lote por produto</td>
             <td><code>SELECT</code> em <code>lote</code> somando <code>qt_lote</code> do produto e comparando com <code>qt_solicitada</code>. Disponível: segue para a etapa 4. Indisponível: segue para a etapa 6.</td></tr>
           <tr><td>4. Faturamento</td><td>Sistema → Fiscal</td><td>número, data e valor da nota; id do pedido</td>
             <td><code>INSERT</code> em <code>nota_fiscal</code> (1 por pedido) e geração da ficha de pagamento do pedido.</td></tr>
           <tr><td>5. Pagamento e liberação</td><td>Distribuidor → Financeiro → Estoque</td><td>data, valor e forma do pagamento</td>
-            <td>Pago ou com acordo formal: <code>INSERT</code> em <code>pagamento</code>, <code>UPDATE</code> do status do pedido para "pago", separação dos produtos e depois "entregue". Sem pagamento ou acordo: pedido fica aguardando pagamento.</td></tr>
+            <td>Pago ou com acordo formal: <code>INSERT</code> em <code>pagamento</code>, <code>UPDATE</code> do status do pedido para "liberado", separação dos produtos e depois "entregue", com <code>UPDATE</code> de <code>qt_lote</code> diminuindo o saldo do lote de validade mais próxima (FEFO). Sem pagamento ou acordo: pedido fica aguardando pagamento.</td></tr>
           <tr><td>6. Reposição de estoque</td><td>Sistema → Distribuidor e Fábrica</td><td>produtos faltantes; pedido de reposição</td>
-            <td>Avisa o distribuidor, solicita à fábrica e registra <code>INSERT</code> em <code>compra</code> (vinculada a <code>fornecedor</code>).</td></tr>
+            <td>Avisa o distribuidor, solicita à fábrica e registra <code>INSERT</code> em <code>compra</code> (vinculada a <code>fornecedor</code>). Produtos com a soma de <code>qt_lote</code> igual ou abaixo de <code>qt_estoque_minimo</code> entram na lista de reposição (RN12).</td></tr>
           <tr><td>7. Recebimento e entrada</td><td>Fornecedor → Estoque</td><td>NF de compra, produto, quantidade, validade</td>
             <td>Confere a entrada da compra, <code>INSERT</code> em <code>lote</code> (com <code>id_compra</code>, <code>id_produto</code>, <code>qt_lote</code>, <code>dt_validade</code>) e atualiza a quantidade em estoque. Retorna à etapa 3.</td></tr>
           <tr><td>8. Controle de validade</td><td>Estoque → Gestão</td><td>dt_validade dos lotes</td>
@@ -150,7 +150,7 @@
         </table>
         </div>
       </section>
-
+ 
       <!-- 3 -->
       <section class="section">
         <h2>3. Convenções</h2>
@@ -178,7 +178,7 @@
           <li>st_ – Situação (status)</li>
         </ul>
       </section>
-
+ 
       <!-- 4 -->
       <section class="section">
         <h2>4. Notação Formal</h2>
@@ -189,30 +189,30 @@
           <tr><td><code>+</code></td><td>"e" (junção de elementos)</td><td><code>id_produto + nm_produto</code></td></tr>
           <tr><td><code>@</code></td><td>Identificador: campo-chave primária (PK). Se composta, <code>@(a + b)</code></td><td><code>@id_pedido</code></td></tr>
           <tr><td><code>( )</code></td><td>Elemento opcional</td><td><code>(nr_telefone)</code></td></tr>
-          <tr><td><code>[ | ]</code></td><td>Seleção: um dos valores listados</td><td><code>[pendente | pago | entregue]</code></td></tr>
+          <tr><td><code>[ | ]</code></td><td>Seleção: um dos valores listados</td><td><code>[pendente | liberado | entregue]</code></td></tr>
           <tr><td><code>m{ }n</code></td><td>Repetição: de m a n ocorrências</td><td><code>1{PEDIDO_PRODUTO}n</code></td></tr>
           <tr><td><code>→</code></td><td>Chave estrangeira (FK) apontando para a entidade referenciada</td><td><code>id_pedido → PEDIDO</code></td></tr>
         </table>
         <div class="formal">DISTRIBUIDOR = @id_distribuidor + nm_distribuidor + nr_cnpj + ds_endereco + (nr_telefone)
 PEDIDO = @id_pedido + dt_pedido + st_pedido + id_distribuidor → DISTRIBUIDOR
-st_pedido = [pendente | pago | entregue]
-PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada
+st_pedido = [pendente | liberado | entregue]
+PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada + vl_preco_praticado
 ITENS_DO_PEDIDO = PEDIDO + 1{PEDIDO_PRODUTO}n</div>
         <p>
           <strong>Leitura:</strong> DISTRIBUIDOR é composto de um identificador (@) <code>id_distribuidor</code>, e de um nome, e de um CNPJ, e de um
           endereço, e, opcionalmente (parênteses), de um telefone. PEDIDO é composto do identificador <code>id_pedido</code>, e da data, e da situação, e do
-          <code>id_distribuidor</code>, que é chave estrangeira apontando para DISTRIBUIDOR; a situação é uma seleção: apenas pendente, pago ou entregue.
+          <code>id_distribuidor</code>, que é chave estrangeira apontando para DISTRIBUIDOR; a situação é uma seleção: apenas pendente, liberado ou entregue.
           PEDIDO_PRODUTO tem como identificador a combinação (@ composto) de <code>id_pedido</code> e <code>id_produto</code>, ambos chaves estrangeiras, e mais a
-          quantidade solicitada. ITENS_DO_PEDIDO é um pedido junto de 1 a n registros de PEDIDO_PRODUTO (chaves { }): todo pedido tem ao menos um item.
+          quantidade solicitada e o preço praticado do item. ITENS_DO_PEDIDO é um pedido junto de 1 a n registros de PEDIDO_PRODUTO (chaves { }): todo pedido tem ao menos um item.
         </p>
       </section>
-
+ 
       <!-- 5 -->
       <section class="section">
         <h2>5. Estrutura das Entidades (Dicionário de Dados)</h2>
         <p>Os nomes abaixo são os nomes físicos (prefixados), usados no SQL. Todas as colunas das tabelas são <code>NOT NULL</code>, exceto <code>nr_telefone</code> em DISTRIBUIDOR.</p>
       </section>
-
+ 
       <section class="entity">
         <h3>01. Distribuidor</h3>
         <p>Armazena os dados cadastrais dos distribuidores parceiros.</p>
@@ -227,49 +227,51 @@ ITENS_DO_PEDIDO = PEDIDO + 1{PEDIDO_PRODUTO}n</div>
         </table>
         <p><strong>Índices:</strong> PK(id_distribuidor) identifica a linha e é o destino da FK de pedido; UNIQUE(nr_cnpj) garante a regra de CNPJ único e acelera a busca por CNPJ na validação do cadastro.</p>
       </section>
-
+ 
       <section class="entity">
         <h3>02. Produto</h3>
         <p>Representa os produtos comercializados.</p>
-        <div class="formal">PRODUTO = @id_produto + nm_produto + tp_produto + vl_preco</div>
+        <div class="formal">PRODUTO = @id_produto + nm_produto + tp_produto + vl_preco + qt_estoque_minimo</div>
         <table>
           <tr><th>Atributo</th><th>Tipo</th><th>Obrigatório</th><th>Significado</th></tr>
           <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único.</td></tr>
           <tr><td><code>nm_produto</code></td><td>VARCHAR(120)</td><td>Sim</td><td>Nome comercial.</td></tr>
           <tr><td><code>tp_produto</code></td><td>VARCHAR(50)</td><td>Sim</td><td>Tipo do produto (ex.: Shampoo, Condicionador, Máscara Capilar).</td></tr>
-          <tr><td><code>vl_preco</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Preço de venda (maior que zero).</td></tr>
+          <tr><td><code>vl_preco</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Preço de venda vigente (maior que zero). Muda para pedidos futuros; o preço de cada item já vendido fica em <code>vl_preco_praticado</code>.</td></tr>
+          <tr><td><code>qt_estoque_minimo</code></td><td>INTEGER</td><td>Sim</td><td>Estoque mínimo do produto (maior ou igual a zero). Quando a soma de <code>qt_lote</code> do produto fica igual ou abaixo desse valor, o produto entra na lista de reposição (RN12).</td></tr>
         </table>
         <p><strong>Índices:</strong> PK(id_produto), destino das FKs de pedido_produto e lote. Não há índice extra em nome ou tipo: o catálogo é pequeno e um índice a mais só aumentaria o custo de escrita.</p>
       </section>
-
+ 
       <section class="entity">
         <h3>03. Pedido</h3>
         <p>Formaliza a solicitação de compra realizada por um distribuidor.</p>
         <div class="formal">PEDIDO = @id_pedido + dt_pedido + st_pedido + id_distribuidor → DISTRIBUIDOR
-st_pedido = [pendente | pago | entregue]</div>
+st_pedido = [pendente | liberado | entregue]</div>
         <table>
           <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
           <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do pedido.</td></tr>
           <tr><td><code>dt_pedido</code></td><td>DATE</td><td>Sim</td><td>Data de criação do pedido.</td></tr>
-          <tr><td><code>st_pedido</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Situação do pedido (pendente, pago, entregue).</td></tr>
+          <tr><td><code>st_pedido</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Situação do pedido (pendente, liberado, entregue).</td></tr>
           <tr><td><code>id_distribuidor</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Distribuidor responsável pelo pedido.</td></tr>
         </table>
         <p><strong>Índices:</strong> PK(id_pedido); índice em id_distribuidor, para listar rapidamente os pedidos de um distribuidor e acelerar o join (a FK exige índice no InnoDB); índice em st_pedido, para filtros frequentes como "pedidos pendentes" e "aguardando pagamento".</p>
       </section>
-
+ 
       <section class="entity">
         <h3>04. Entidade associativa Pedido-Produto</h3>
-        <p>Resolve o relacionamento N:N entre pedidos e produtos e guarda a quantidade solicitada de cada item.</p>
-        <div class="formal">PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada</div>
+        <p>Resolve o relacionamento N:N entre pedidos e produtos e guarda a quantidade solicitada e o preço praticado de cada item.</p>
+        <div class="formal">PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada + vl_preco_praticado</div>
         <table>
           <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
           <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (PK, FK)</td><td>Pedido que contém o produto.</td></tr>
           <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (PK, FK)</td><td>Produto solicitado no pedido.</td></tr>
           <tr><td><code>qt_solicitada</code></td><td>INTEGER</td><td>Sim</td><td>Quantidade do produto no pedido (maior que zero).</td></tr>
+          <tr><td><code>vl_preco_praticado</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Preço unitário do produto na data do pedido (maior que zero), copiado de <code>vl_preco</code> no momento da venda. Mudanças posteriores de preço não alteram pedidos já emitidos (RN05).</td></tr>
         </table>
-        <p><strong>Índices:</strong> PK composta (id_pedido, id_produto): impede o mesmo produto duplicado no mesmo pedido e atende a busca dos itens de um pedido; índice em id_produto, porque a PK composta só ajuda consultas que começam por id_pedido, e este índice atende "em quais pedidos o produto aparece". Regra: CHECK (qt_solicitada &gt; 0).</p>
+        <p><strong>Índices:</strong> PK composta (id_pedido, id_produto): impede o mesmo produto duplicado no mesmo pedido e atende a busca dos itens de um pedido; índice em id_produto, porque a PK composta só ajuda consultas que começam por id_pedido, e este índice atende "em quais pedidos o produto aparece". Regras: CHECK (qt_solicitada &gt; 0) e CHECK (vl_preco_praticado &gt; 0).</p>
       </section>
-
+ 
       <section class="entity">
         <h3>05. Nota Fiscal</h3>
         <p>Documento fiscal emitido quando um pedido é faturado.</p>
@@ -279,12 +281,12 @@ st_pedido = [pendente | pago | entregue]</div>
           <tr><td><code>id_nf</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único da nota fiscal.</td></tr>
           <tr><td><code>nr_nf</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Número oficial da nota fiscal (único).</td></tr>
           <tr><td><code>dt_emissao</code></td><td>DATE</td><td>Sim</td><td>Data de emissão da nota.</td></tr>
-          <tr><td><code>vl_nf</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor total faturado (maior que zero).</td></tr>
+          <tr><td><code>vl_nf</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor total faturado (maior que zero); deve ser igual à soma de <code>qt_solicitada</code> × <code>vl_preco_praticado</code> dos itens do pedido (RN09).</td></tr>
           <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Pedido relacionado à nota fiscal.</td></tr>
         </table>
         <p><strong>Índices:</strong> PK(id_nf); UNIQUE(id_pedido), que implementa a cardinalidade (0,1)–(1,1) do banco: um pedido não pode ter duas notas; UNIQUE(nr_nf), pois o número oficial não se repete.</p>
       </section>
-
+ 
       <section class="entity">
         <h3>06. Pagamento</h3>
         <p>Registra os pagamentos realizados para um pedido.</p>
@@ -300,7 +302,7 @@ tp_forma_pagamento = [PIX | boleto | transferência]</div>
         </table>
         <p><strong>Índices:</strong> PK(id_pagamento); índice em id_pedido, para somar os pagamentos de um pedido e conferir a quitação; índice em dt_pagamento, usado nos relatórios e conferências financeiras por período.</p>
       </section>
-
+ 
       <section class="entity">
         <h3>07. Fornecedor</h3>
         <p>Representa os fornecedores responsáveis pela produção dos itens comercializados.</p>
@@ -315,7 +317,7 @@ tp_forma_pagamento = [PIX | boleto | transferência]</div>
         </table>
         <p><strong>Índices:</strong> PK(id_fornecedor); UNIQUE(nr_cnpj), que impede fornecedor duplicado e acelera a busca por CNPJ.</p>
       </section>
-
+ 
       <section class="entity">
         <h3>08. Compra</h3>
         <p>Representa as compras realizadas junto aos fornecedores.</p>
@@ -329,7 +331,7 @@ tp_forma_pagamento = [PIX | boleto | transferência]</div>
         </table>
         <p><strong>Índices:</strong> PK(id_compra), destino da FK de lote; índice em id_fornecedor, para listar as compras de cada fornecedor e acelerar o join.</p>
       </section>
-
+ 
       <section class="entity">
         <h3>09. Lote</h3>
         <p>Controla os lotes recebidos no estoque e sua rastreabilidade.</p>
@@ -339,12 +341,12 @@ tp_forma_pagamento = [PIX | boleto | transferência]</div>
           <tr><td><code>id_lote</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do lote.</td></tr>
           <tr><td><code>id_compra</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Compra de origem.</td></tr>
           <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Produto armazenado.</td></tr>
-          <tr><td><code>qt_lote</code></td><td>INTEGER</td><td>Sim</td><td>Quantidade disponível (maior que zero).</td></tr>
+          <tr><td><code>qt_lote</code></td><td>INTEGER</td><td>Sim</td><td>Saldo atual do lote (maior ou igual a zero). Começa com a quantidade recebida e diminui a cada entrega, do lote de validade mais próxima (FEFO, RN11). A quantidade original recebida não é guardada.</td></tr>
           <tr><td><code>dt_validade</code></td><td>DATE</td><td>Sim</td><td>Data de validade do lote (igual ou posterior à data da compra).</td></tr>
         </table>
         <p><strong>Índices:</strong> PK(id_lote); índice em id_compra, para rastrear os lotes de uma compra; índice em id_produto, para somar o estoque disponível de um produto na verificação de disponibilidade do pedido; índice em dt_validade, base do relatório e do alerta de vencimento.</p>
       </section>
-
+ 
       <!-- 6 -->
       <section class="section">
         <h2>6. Log de Acesso (Metadado Operacional)</h2>
@@ -357,7 +359,7 @@ tp_forma_pagamento = [PIX | boleto | transferência]</div>
           das alterações realizadas no banco.
         </p>
       </section>
-
+ 
       <!-- 7 -->
       <section class="section">
         <h2>7. Controle de Acesso</h2>
@@ -365,17 +367,17 @@ tp_forma_pagamento = [PIX | boleto | transferência]</div>
           <tr><th>Tabela</th><th>Ler</th><th>Inserir</th><th>Atualizar</th><th>Apagar</th></tr>
           <tr><td>distribuidor</td><td>Comercial</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
           <tr><td>produto</td><td>Comercial/Estoque</td><td>Administrativo</td><td>Administrativo</td><td>Administrativo</td></tr>
-          <tr><td>pedido</td><td>Comercial</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
-          <tr><td>pedido_produto</td><td>Comercial</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
+          <tr><td>pedido</td><td>Comercial/Financeiro/Fiscal/Estoque</td><td>Comercial</td><td>Comercial/Financeiro/Estoque</td><td>Administrativo</td></tr>
+          <tr><td>pedido_produto</td><td>Comercial/Fiscal/Estoque</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
           <tr><td>nota_fiscal</td><td>Fiscal</td><td>Fiscal</td><td>Nenhum</td><td>Nenhum</td></tr>
           <tr><td>pagamento</td><td>Financeiro</td><td>Financeiro</td><td>Financeiro</td><td>Administrativo</td></tr>
           <tr><td>fornecedor</td><td>Compras</td><td>Compras</td><td>Compras</td><td>Administrativo</td></tr>
           <tr><td>compra</td><td>Compras</td><td>Compras</td><td>Compras</td><td>Administrativo</td></tr>
-          <tr><td>lote</td><td>Estoque</td><td>Estoque</td><td>Estoque</td><td>Administrativo</td></tr>
+          <tr><td>lote</td><td>Estoque/Comercial</td><td>Estoque</td><td>Estoque</td><td>Administrativo</td></tr>
         </table>
-        <p>Este modelo segue as práticas de rastreabilidade e controle de acesso apresentadas no exemplo utilizado como referência, adaptadas ao contexto comercial da Unileste Comércio LTDA.</p>
+        <p>O Financeiro atualiza o pedido ao liberá-lo (status "liberado") e o Estoque ao entregá-lo (status "entregue"); a leitura é ampliada para quem precisa consultar o pedido, os itens e o saldo dos lotes. Este modelo segue as práticas de rastreabilidade e controle de acesso apresentadas no exemplo utilizado como referência, adaptadas ao contexto comercial da Unileste Comércio LTDA.</p>
       </section>
-
+ 
       <!-- 8 -->
       <section class="section">
         <h2>8. LGPD: Proteção de Dados Pessoais</h2>
