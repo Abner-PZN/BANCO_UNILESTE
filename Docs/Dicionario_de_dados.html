@@ -236,7 +236,7 @@ ITENS_DO_PEDIDO = PEDIDO + 1{PEDIDO_PRODUTO}n</div>
           <tr><th>Atributo</th><th>Tipo</th><th>Obrigatório</th><th>Significado</th></tr>
           <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único.</td></tr>
           <tr><td><code>nm_produto</code></td><td>VARCHAR(120)</td><td>Sim</td><td>Nome comercial.</td></tr>
-          <tr><td><code>tp_produto</code></td><td>VARCHAR(50)</td><td>Sim</td><td>Tipo do produto (ex.: Shampoo, Condicionador, Máscara Capilar).</td></tr>
+          <tr><td><code>tp_produto</code></td><td>VARCHAR(50)</td><td>Sim</td><td>Tipo do produto. Tipos atuais: shampoo, condicionador, máscara, óleo reparador, perfumes capilares, ox, coloração e pó descolorante. A lista é aberta: novos tipos são cadastrados pelo Administrativo quando a empresa lançar novas linhas, sem alterar a estrutura da tabela.</td></tr>
           <tr><td><code>vl_preco</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Preço de venda vigente (maior que zero). Muda para pedidos futuros; o preço de cada item já vendido fica em <code>vl_preco_praticado</code>.</td></tr>
           <tr><td><code>qt_estoque_minimo</code></td><td>INTEGER</td><td>Sim</td><td>Estoque mínimo do produto (maior ou igual a zero). Quando a soma de <code>qt_lote</code> do produto fica igual ou abaixo desse valor, o produto entra na lista de reposição (RN12).</td></tr>
         </table>
@@ -291,13 +291,13 @@ st_pedido = [pendente | liberado | entregue]</div>
         <h3>06. Pagamento</h3>
         <p>Registra os pagamentos realizados para um pedido.</p>
         <div class="formal">PAGAMENTO = @id_pagamento + dt_pagamento + vl_pagamento + tp_forma_pagamento + id_pedido → PEDIDO
-tp_forma_pagamento = [PIX | boleto | transferência]</div>
+tp_forma_pagamento = [cartão | boleto | pix | cheque | transferência bancária | dinheiro]</div>
         <table>
           <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
           <tr><td><code>id_pagamento</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do pagamento.</td></tr>
           <tr><td><code>dt_pagamento</code></td><td>DATE</td><td>Sim</td><td>Data do pagamento.</td></tr>
           <tr><td><code>vl_pagamento</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor pago (maior que zero).</td></tr>
-          <tr><td><code>tp_forma_pagamento</code></td><td>VARCHAR(30)</td><td>Sim</td><td>Forma utilizada (PIX, boleto, transferência etc.).</td></tr>
+          <tr><td><code>tp_forma_pagamento</code></td><td>VARCHAR(30)</td><td>Sim</td><td>Forma utilizada: cartão, boleto, pix, cheque, transferência bancária ou dinheiro (lista fechada, validada por CHECK).</td></tr>
           <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Pedido referente ao pagamento.</td></tr>
         </table>
         <p><strong>Índices:</strong> PK(id_pagamento); índice em id_pedido, para somar os pagamentos de um pedido e conferir a quitação; índice em dt_pagamento, usado nos relatórios e conferências financeiras por período.</p>
