@@ -388,7 +388,7 @@ Valores monetários de compras, pagamentos e notas fiscais devem ser positivos. 
 
 ## DER da UNILESTE
 
-![DER 3.0](Docs/DER_3.0.jpg)
+![DER 3.0](Docs/DER_3.0.jpeg)
 
 ## Entidades e Relacionamentos
 
