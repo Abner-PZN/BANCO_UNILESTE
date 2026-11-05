@@ -2,16 +2,6 @@
 
 **Modelagem de Banco de Dados · Entrega 2 — Do modelo ao banco** · Prof. Cid Andrade · 2026-2
 
-| Artefato | Arquivo |
-| --- | --- |
-| Relatório técnico | este README (seções 1 a 7) |
-| DER conceitual (v3.2) | [Docs/DER_3.2.png](Docs/DER_3.2.png) |
-| Modelo lógico (v2.0) | [Docs/Modelo_logico_2.0.png](Docs/Modelo_logico_2.0.png) |
-| Dicionário de dados (v2.0) | [Docs/Dicionario_de_dados.html](Docs/Dicionario_de_dados.html) |
-| Script SQL completo + massa de dados | [Docs/script.sql](Docs/script.sql) |
-| Levantamento | [levantamento/levantamento.md](levantamento/levantamento.md) |
-| Fluxograma dos processos | [Docs/Fluxograma1.2.png](Docs/Fluxograma1.2.png) |
-
 ## Integrantes
 
 | Nome completo do aluno | RGM | Usuário do GitHub |
