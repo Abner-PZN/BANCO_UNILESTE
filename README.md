@@ -50,11 +50,6 @@ Foram identificadas dificuldades no controle das fichas de pagamento dos distrib
   - **Site e redes sociais:** https://tutticapelli.com.br/ | https://www.instagram.com/tutticapelliprofessional/
   - **Responsável pela organização:** Alfredo Veronezi Gomides, Gerente, (11) 98104-9575.
   - **Vínculo do grupo:** Abner Barbosa Machado trabalha atualmente na Unileste como Estoquista. ele não dispensou a entrevista com o responsável, realizada no ambiente da empresa .
-  - **Fotos:**
-
-    ![Foto da fachada](Docs/FotoFachada.jpeg)
-    ![Foto do estoque](Docs/FotoEstoque.jpg)
-    ![Foto da recepção](Docs/FotoRecepcao.jpeg)
 
 ### Relato da entrevista
 
