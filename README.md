@@ -325,7 +325,7 @@ O grupo levantou (com pesquisa e apoio de IA, ver seção 6) regras comuns em di
 
 ### DER conceitual (versão 3.2)
 
-![DER 3.2](Docs/DER_3.2.png)
+![DER 3.2](Docs/Modelo_conceitual.png)
 
 **Notação:** brModelo. Entidades em retângulos, relacionamentos em losangos, atributo identificador em **círculo preenchido**, atributo comum em **círculo vazio** e cardinalidade (mín,máx) junto de cada entidade. O relacionamento Contém (N:N entre Pedido e Produto) é uma **entidade associativa**, desenhada como no brModelo: o losango dentro de um retângulo, com os atributos quantidade e preco_praticado ligados a ela. O DER não tem chaves estrangeiras. Também não há atributos multivalorados, compostos nem generalização/especialização (ver 1.2).
 
