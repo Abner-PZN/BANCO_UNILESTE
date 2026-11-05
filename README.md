@@ -329,7 +329,7 @@ O grupo levantou (com pesquisa e apoio de IA, ver seção 6) regras comuns em di
 
 **Notação:** brModelo. Entidades em retângulos, relacionamentos em losangos, atributo identificador em **círculo preenchido**, atributo comum em **círculo vazio** e cardinalidade (mín,máx) junto de cada entidade. O relacionamento Contém (N:N entre Pedido e Produto) é uma **entidade associativa**, desenhada como no brModelo: o losango dentro de um retângulo, com os atributos quantidade e preco_praticado ligados a ela. O DER não tem chaves estrangeiras. Também não há atributos multivalorados, compostos nem generalização/especialização (ver 1.2).
 
-**Software utilizado:** o DER 3.2 foi desenhado em SVG por um script gerado com apoio do Claude (Anthropic), seguindo a notação do brModelo, e exportado para PNG (registro na seção 6). **[Se o grupo redesenhar no brModelo, trocar a imagem e escrever aqui: "brModelo versão X".]**
+**Software utilizado:** o DER 3.2 foi desenhado em SVG por um script gerado com apoio do Claude (Anthropic), seguindo a notação do brModelo, e exportado para PNG (registro na seção 6). 
 
 #### Entidades e relacionamentos
 
