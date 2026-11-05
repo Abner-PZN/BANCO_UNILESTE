@@ -44,12 +44,12 @@
       </header>
  
       <div class="metrics">
-        <div class="metric"><strong>08</strong>Entidades</div>
+        <div class="metric"><strong>12</strong>Entidades</div>
         <div class="metric"><strong>01</strong>Associativa</div>
-        <div class="metric"><strong>07</strong>Relacionamentos</div>
-        <div class="metric"><strong>42</strong>Atributos</div>
+        <div class="metric"><strong>12</strong>Relacionamentos</div>
+        <div class="metric"><strong>63</strong>Colunas</div>
         <div class="metric"><strong>MySQL 8</strong>SGBD</div>
-        <div class="metric"><strong>v1.3</strong>02/nov/2026</div>
+        <div class="metric"><strong>v2.0</strong>04/nov/2026</div>
       </div>
  
       <!-- 1 -->
@@ -57,7 +57,7 @@
         <h2>1. Modelo Conceitual</h2>
         <p>
           Este modelo representa o processo comercial da Unileste Comércio LTDA., responsável pela venda de produtos a
-          distribuidores, emissão de notas fiscais, controle de pagamentos e rastreabilidade dos lotes adquiridos junto aos fornecedores.
+          distribuidores, emissão de notas fiscais, controle de pagamentos e rastreabilidade dos lotes adquiridos junto aos fornecedores. Na versão 2.0 o modelo passou a cobrir também as marcas, os funcionários que registram os pedidos, as devoluções e as contas a pagar às fábricas, e o pedido ganhou a situação "cancelado".
         </p>
  
         <h3>1.1 Entidade associativa identificada: PEDIDO_PRODUTO</h3>
@@ -114,6 +114,31 @@
             <td><strong>(1,n)</strong>: a compra só se conclui com o recebimento de ao menos um lote e pode gerar vários.
             <strong>(1,1)</strong>: cada lote tem uma única compra de origem, garantindo rastreabilidade (<code>id_compra</code> NOT NULL).</td>
           </tr>
+          <tr>
+            <td>Funcionário <em>registra</em> Pedido</td><td>Funcionário <code>(0,n)</code></td><td>Pedido <code>(1,1)</code></td>
+            <td><strong>(0,n)</strong>: nem todo funcionário registra pedidos (ex.: estoquista) e um vendedor registra vários.
+            <strong>(1,1)</strong>: todo pedido é registrado por exatamente um funcionário (<code>id_funcionario</code> NOT NULL).</td>
+          </tr>
+          <tr>
+            <td>Marca <em>possui</em> Produto</td><td>Marca <code>(1,n)</code></td><td>Produto <code>(1,1)</code></td>
+            <td><strong>(1,n)</strong>: a marca só existe no cadastro porque tem produtos (as duas marcas têm linhas próprias).
+            <strong>(1,1)</strong>: cada produto pertence a uma única marca (<code>id_marca</code> NOT NULL).</td>
+          </tr>
+          <tr>
+            <td>Nota Fiscal <em>devolve</em> Devolução</td><td>Nota Fiscal <code>(0,n)</code></td><td>Devolução <code>(1,1)</code></td>
+            <td><strong>(0,n)</strong>: a maioria das notas não tem devolução; uma nota pode ter mais de uma (itens diferentes).
+            <strong>(1,1)</strong>: toda devolução cita a nota fiscal de origem (RN15, <code>id_nf</code> NOT NULL).</td>
+          </tr>
+          <tr>
+            <td>Lote <em>origina</em> Devolução</td><td>Lote <code>(0,n)</code></td><td>Devolução <code>(1,1)</code></td>
+            <td><strong>(0,n)</strong>: um lote pode ter nenhuma ou várias devoluções (sinal de problema recorrente, avisado à fábrica).
+            <strong>(1,1)</strong>: toda devolução cita o lote de origem (RN15, <code>id_lote</code> NOT NULL).</td>
+          </tr>
+          <tr>
+            <td>Compra <em>gera</em> Pagamento de Compra</td><td>Compra <code>(1,n)</code></td><td>Pagamento_Compra <code>(1,1)</code></td>
+            <td><strong>(1,n)</strong>: toda compra gera ao menos uma parcela a pagar à fábrica (RN20) e pode gerar várias.
+            <strong>(1,1)</strong>: cada parcela é de uma única compra (<code>id_compra</code> NOT NULL).</td>
+          </tr>
         </table>
         </div>
         <div class="note">
@@ -127,7 +152,7 @@
       <!-- 2 -->
       <section class="section">
         <h2>2. Fluxo de Dados</h2>
-        <p>Visão geral: Fornecedor → Compra → Lote → Produto → Pedido → Nota Fiscal → Pagamentos. Detalhamento por etapa, seguindo o fluxograma "Processo de Atendimento e Pedidos":</p>
+        <p>Visão geral: Fornecedor → Compra (→ Pagamento de Compra) → Lote → Produto → Pedido → Nota Fiscal → Pagamentos (→ Devolução). Detalhamento por etapa, seguindo o fluxograma "Processo de Atendimento e Pedidos":</p>
         <div class="scroll">
         <table>
           <tr><th>Etapa</th><th>Origem → Destino</th><th>Dados que trafegam</th><th>Tabelas / operação</th></tr>
@@ -147,6 +172,12 @@
             <td>Confere a entrada da compra, <code>INSERT</code> em <code>lote</code> (com <code>id_compra</code>, <code>id_produto</code>, <code>qt_lote</code>, <code>dt_validade</code>) e atualiza a quantidade em estoque. Retorna à etapa 3.</td></tr>
           <tr><td>8. Controle de validade</td><td>Estoque → Gestão</td><td>dt_validade dos lotes</td>
             <td><code>SELECT</code> em <code>lote</code> por <code>dt_validade</code>; se próximo do vencimento, emite alerta de vencimento (relatório de validade).</td></tr>
+          <tr><td>9. Cancelamento</td><td>Distribuidor → Comercial</td><td>id do pedido</td>
+            <td>Só pedido "pendente": <code>UPDATE</code> de <code>st_pedido</code> para "cancelado". O pedido não é apagado (trigger, RN26) e não recebe nota nem pagamento.</td></tr>
+          <tr><td>10. Contas a pagar</td><td>Compras → Financeiro → Fábrica</td><td>vencimento, valor, data e forma do pagamento</td>
+            <td><code>INSERT</code> em <code>pagamento_compra</code> (parcelas da compra); ao pagar, <code>UPDATE</code> de <code>dt_pagamento</code> e <code>tp_forma_pagamento</code> (RN20).</td></tr>
+          <tr><td>11. Devolução e troca</td><td>Distribuidor → Comercial → Gerente</td><td>nota, lote, quantidade, motivo</td>
+            <td><code>INSERT</code> em <code>devolucao</code> (situação "em_analise"); o gerente decide e faz <code>UPDATE</code> para "aceita" (com troca, crédito ou estorno) ou "recusada" (RN14–RN16).</td></tr>
         </table>
         </div>
       </section>
@@ -189,19 +220,19 @@
           <tr><td><code>+</code></td><td>"e" (junção de elementos)</td><td><code>id_produto + nm_produto</code></td></tr>
           <tr><td><code>@</code></td><td>Identificador: campo-chave primária (PK). Se composta, <code>@(a + b)</code></td><td><code>@id_pedido</code></td></tr>
           <tr><td><code>( )</code></td><td>Elemento opcional</td><td><code>(nr_telefone)</code></td></tr>
-          <tr><td><code>[ | ]</code></td><td>Seleção: um dos valores listados</td><td><code>[pendente | liberado | entregue]</code></td></tr>
+          <tr><td><code>[ | ]</code></td><td>Seleção: um dos valores listados</td><td><code>[pendente | liberado | entregue | cancelado]</code></td></tr>
           <tr><td><code>m{ }n</code></td><td>Repetição: de m a n ocorrências</td><td><code>1{PEDIDO_PRODUTO}n</code></td></tr>
           <tr><td><code>→</code></td><td>Chave estrangeira (FK) apontando para a entidade referenciada</td><td><code>id_pedido → PEDIDO</code></td></tr>
         </table>
         <div class="formal">DISTRIBUIDOR = @id_distribuidor + nm_distribuidor + nr_cnpj + ds_endereco + (nr_telefone)
-PEDIDO = @id_pedido + dt_pedido + st_pedido + id_distribuidor → DISTRIBUIDOR
-st_pedido = [pendente | liberado | entregue]
+PEDIDO = @id_pedido + dt_pedido + st_pedido + id_distribuidor → DISTRIBUIDOR + id_funcionario → FUNCIONARIO
+st_pedido = [pendente | liberado | entregue | cancelado]
 PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada + vl_preco_praticado
 ITENS_DO_PEDIDO = PEDIDO + 1{PEDIDO_PRODUTO}n</div>
         <p>
           <strong>Leitura:</strong> DISTRIBUIDOR é composto de um identificador (@) <code>id_distribuidor</code>, e de um nome, e de um CNPJ, e de um
           endereço, e, opcionalmente (parênteses), de um telefone. PEDIDO é composto do identificador <code>id_pedido</code>, e da data, e da situação, e do
-          <code>id_distribuidor</code>, que é chave estrangeira apontando para DISTRIBUIDOR; a situação é uma seleção: apenas pendente, liberado ou entregue.
+          <code>id_distribuidor</code>, que é chave estrangeira apontando para DISTRIBUIDOR, e do <code>id_funcionario</code>, que aponta para FUNCIONARIO; a situação é uma seleção: apenas pendente, liberado, entregue ou cancelado.
           PEDIDO_PRODUTO tem como identificador a combinação (@ composto) de <code>id_pedido</code> e <code>id_produto</code>, ambos chaves estrangeiras, e mais a
           quantidade solicitada e o preço praticado do item. ITENS_DO_PEDIDO é um pedido junto de 1 a n registros de PEDIDO_PRODUTO (chaves { }): todo pedido tem ao menos um item.
         </p>
@@ -210,154 +241,250 @@ ITENS_DO_PEDIDO = PEDIDO + 1{PEDIDO_PRODUTO}n</div>
       <!-- 5 -->
       <section class="section">
         <h2>5. Estrutura das Entidades (Dicionário de Dados)</h2>
-        <p>Os nomes abaixo são os nomes físicos (prefixados), usados no SQL. Todas as colunas das tabelas são <code>NOT NULL</code>, exceto <code>nr_telefone</code> em DISTRIBUIDOR.</p>
+        <p>Nomes físicos usados no script SQL (<code>Docs/script.sql</code>). Para cada coluna: tipo, chave, e as restrições de integridade —
+        <strong>obrigatoriedade</strong> (NOT NULL), <strong>unicidade</strong> (UNIQUE/PK), <strong>valores permitidos</strong> (CHECK, FK ou trigger, com a regra RNxx)
+        e <strong>valor padrão</strong> (DEFAULT). Regras entre linhas ou tabelas que o CHECK do MySQL não expressa são garantidas por trigger
+        ou conferidas pelas consultas de auditoria (A01–A21).</p>
       </section>
  
       <section class="entity">
         <h3>01. Distribuidor</h3>
-        <p>Armazena os dados cadastrais dos distribuidores parceiros.</p>
+        <p>Distribuidores (pessoa jurídica) que compram para revender aos salões.</p>
         <div class="formal">DISTRIBUIDOR = @id_distribuidor + nm_distribuidor + nr_cnpj + ds_endereco + (nr_telefone)</div>
+        <div class="scroll">
         <table>
-          <tr><th>Atributo</th><th>Tipo</th><th>Obrigatório</th><th>Significado</th></tr>
-          <tr><td><code>id_distribuidor</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único.</td></tr>
-          <tr><td><code>nm_distribuidor</code></td><td>VARCHAR(120)</td><td>Sim</td><td>Razão social.</td></tr>
-          <tr><td><code>nr_cnpj</code></td><td>VARCHAR(18)</td><td>Sim</td><td>CNPJ válido e único (formato 00.000.000/0000-00).</td></tr>
-          <tr><td><code>ds_endereco</code></td><td>VARCHAR(200)</td><td>Sim</td><td>Endereço.</td></tr>
-          <tr><td><code>nr_telefone</code></td><td>VARCHAR(20)</td><td>Não</td><td>Telefone.</td></tr>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_distribuidor</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único do distribuidor.</td></tr>
+          <tr><td><code>nm_distribuidor</code></td><td>VARCHAR(120)</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Razão social.</td></tr>
+          <tr><td><code>nr_cnpj</code></td><td>VARCHAR(18)</td><td>—</td><td>Sim</td><td>Sim</td><td>Formato 00.000.000/0000-00 (CHECK) e dígitos verificadores válidos (trigger) — RN02</td><td>—</td><td>CNPJ do distribuidor.</td></tr>
+          <tr><td><code>ds_endereco</code></td><td>VARCHAR(200)</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Endereço completo.</td></tr>
+          <tr><td><code>nr_telefone</code></td><td>VARCHAR(20)</td><td>—</td><td>Não</td><td>Não</td><td>—</td><td>—</td><td>Telefone de contato (opcional: minimização, LGPD).</td></tr>
         </table>
-        <p><strong>Índices:</strong> PK(id_distribuidor) identifica a linha e é o destino da FK de pedido; UNIQUE(nr_cnpj) garante a regra de CNPJ único e acelera a busca por CNPJ na validação do cadastro.</p>
+        </div>
+        <p><strong>Índices:</strong> PK(id_distribuidor), destino da FK de pedido; UNIQUE(nr_cnpj), que garante CNPJ único (RN02) e acelera a busca por CNPJ.</p>
       </section>
  
       <section class="entity">
-        <h3>02. Produto</h3>
-        <p>Representa os produtos comercializados.</p>
-        <div class="formal">PRODUTO = @id_produto + nm_produto + tp_produto + vl_preco + qt_estoque_minimo</div>
-        <table>
-          <tr><th>Atributo</th><th>Tipo</th><th>Obrigatório</th><th>Significado</th></tr>
-          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único.</td></tr>
-          <tr><td><code>nm_produto</code></td><td>VARCHAR(120)</td><td>Sim</td><td>Nome comercial.</td></tr>
-          <tr><td><code>tp_produto</code></td><td>VARCHAR(50)</td><td>Sim</td><td>Tipo do produto. Tipos atuais: shampoo, condicionador, máscara, óleo reparador, perfumes capilares, ox, coloração e pó descolorante. A lista é aberta: novos tipos são cadastrados pelo Administrativo quando a empresa lançar novas linhas, sem alterar a estrutura da tabela.</td></tr>
-          <tr><td><code>vl_preco</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Preço de venda vigente (maior que zero). Muda para pedidos futuros; o preço de cada item já vendido fica em <code>vl_preco_praticado</code>.</td></tr>
-          <tr><td><code>qt_estoque_minimo</code></td><td>INTEGER</td><td>Sim</td><td>Estoque mínimo do produto (maior ou igual a zero). Quando a soma de <code>qt_lote</code> do produto fica igual ou abaixo desse valor, o produto entra na lista de reposição (RN12).</td></tr>
-        </table>
-        <p><strong>Índices:</strong> PK(id_produto), destino das FKs de pedido_produto e lote. Não há índice extra em nome ou tipo: o catálogo é pequeno e um índice a mais só aumentaria o custo de escrita.</p>
-      </section>
- 
-      <section class="entity">
-        <h3>03. Pedido</h3>
-        <p>Formaliza a solicitação de compra realizada por um distribuidor.</p>
-        <div class="formal">PEDIDO = @id_pedido + dt_pedido + st_pedido + id_distribuidor → DISTRIBUIDOR
-st_pedido = [pendente | liberado | entregue]</div>
-        <table>
-          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
-          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do pedido.</td></tr>
-          <tr><td><code>dt_pedido</code></td><td>DATE</td><td>Sim</td><td>Data de criação do pedido.</td></tr>
-          <tr><td><code>st_pedido</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Situação do pedido (pendente, liberado, entregue).</td></tr>
-          <tr><td><code>id_distribuidor</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Distribuidor responsável pelo pedido.</td></tr>
-        </table>
-        <p><strong>Índices:</strong> PK(id_pedido); índice em id_distribuidor, para listar rapidamente os pedidos de um distribuidor e acelerar o join (a FK exige índice no InnoDB); índice em st_pedido, para filtros frequentes como "pedidos pendentes" e "aguardando pagamento".</p>
-      </section>
- 
-      <section class="entity">
-        <h3>04. Entidade associativa Pedido-Produto</h3>
-        <p>Resolve o relacionamento N:N entre pedidos e produtos e guarda a quantidade solicitada e o preço praticado de cada item.</p>
-        <div class="formal">PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada + vl_preco_praticado</div>
-        <table>
-          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
-          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (PK, FK)</td><td>Pedido que contém o produto.</td></tr>
-          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (PK, FK)</td><td>Produto solicitado no pedido.</td></tr>
-          <tr><td><code>qt_solicitada</code></td><td>INTEGER</td><td>Sim</td><td>Quantidade do produto no pedido (maior que zero).</td></tr>
-          <tr><td><code>vl_preco_praticado</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Preço unitário do produto na data do pedido (maior que zero), copiado de <code>vl_preco</code> no momento da venda. Mudanças posteriores de preço não alteram pedidos já emitidos (RN05).</td></tr>
-        </table>
-        <p><strong>Índices:</strong> PK composta (id_pedido, id_produto): impede o mesmo produto duplicado no mesmo pedido e atende a busca dos itens de um pedido; índice em id_produto, porque a PK composta só ajuda consultas que começam por id_pedido, e este índice atende "em quais pedidos o produto aparece". Regras: CHECK (qt_solicitada &gt; 0) e CHECK (vl_preco_praticado &gt; 0).</p>
-      </section>
- 
-      <section class="entity">
-        <h3>05. Nota Fiscal</h3>
-        <p>Documento fiscal emitido quando um pedido é faturado.</p>
-        <div class="formal">NOTA_FISCAL = @id_nf + nr_nf + dt_emissao + vl_nf + id_pedido → PEDIDO</div>
-        <table>
-          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
-          <tr><td><code>id_nf</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único da nota fiscal.</td></tr>
-          <tr><td><code>nr_nf</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Número oficial da nota fiscal (único).</td></tr>
-          <tr><td><code>dt_emissao</code></td><td>DATE</td><td>Sim</td><td>Data de emissão da nota.</td></tr>
-          <tr><td><code>vl_nf</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor total faturado (maior que zero); deve ser igual à soma de <code>qt_solicitada</code> × <code>vl_preco_praticado</code> dos itens do pedido (RN09).</td></tr>
-          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Pedido relacionado à nota fiscal.</td></tr>
-        </table>
-        <p><strong>Índices:</strong> PK(id_nf); UNIQUE(id_pedido), que implementa a cardinalidade (0,1)–(1,1) do banco: um pedido não pode ter duas notas; UNIQUE(nr_nf), pois o número oficial não se repete.</p>
-      </section>
- 
-      <section class="entity">
-        <h3>06. Pagamento</h3>
-        <p>Registra os pagamentos realizados para um pedido.</p>
-        <div class="formal">PAGAMENTO = @id_pagamento + dt_pagamento + vl_pagamento + tp_forma_pagamento + id_pedido → PEDIDO
-tp_forma_pagamento = [cartão | boleto | pix | cheque | transferência bancária | dinheiro]</div>
-        <table>
-          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
-          <tr><td><code>id_pagamento</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do pagamento.</td></tr>
-          <tr><td><code>dt_pagamento</code></td><td>DATE</td><td>Sim</td><td>Data do pagamento.</td></tr>
-          <tr><td><code>vl_pagamento</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor pago (maior que zero).</td></tr>
-          <tr><td><code>tp_forma_pagamento</code></td><td>VARCHAR(30)</td><td>Sim</td><td>Forma utilizada: cartão, boleto, pix, cheque, transferência bancária ou dinheiro (lista fechada, validada por CHECK).</td></tr>
-          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Pedido referente ao pagamento.</td></tr>
-        </table>
-        <p><strong>Índices:</strong> PK(id_pagamento); índice em id_pedido, para somar os pagamentos de um pedido e conferir a quitação; índice em dt_pagamento, usado nos relatórios e conferências financeiras por período.</p>
-      </section>
- 
-      <section class="entity">
-        <h3>07. Fornecedor</h3>
-        <p>Representa os fornecedores responsáveis pela produção dos itens comercializados.</p>
+        <h3>02. Fornecedor</h3>
+        <p>Fábricas parceiras que produzem os itens (produção terceirizada).</p>
         <div class="formal">FORNECEDOR = @id_fornecedor + nm_fornecedor + nr_cnpj + ds_endereco + nr_telefone</div>
+        <div class="scroll">
         <table>
-          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
-          <tr><td><code>id_fornecedor</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único.</td></tr>
-          <tr><td><code>nm_fornecedor</code></td><td>VARCHAR(120)</td><td>Sim</td><td>Razão social.</td></tr>
-          <tr><td><code>nr_cnpj</code></td><td>VARCHAR(18)</td><td>Sim</td><td>CNPJ do fornecedor (válido e único).</td></tr>
-          <tr><td><code>ds_endereco</code></td><td>VARCHAR(200)</td><td>Sim</td><td>Endereço.</td></tr>
-          <tr><td><code>nr_telefone</code></td><td>VARCHAR(20)</td><td>Sim</td><td>Telefone para contato.</td></tr>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_fornecedor</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único da fábrica.</td></tr>
+          <tr><td><code>nm_fornecedor</code></td><td>VARCHAR(120)</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Razão social.</td></tr>
+          <tr><td><code>nr_cnpj</code></td><td>VARCHAR(18)</td><td>—</td><td>Sim</td><td>Sim</td><td>Formato 00.000.000/0000-00 (CHECK) e dígitos verificadores válidos (trigger) — RN02</td><td>—</td><td>CNPJ da fábrica.</td></tr>
+          <tr><td><code>ds_endereco</code></td><td>VARCHAR(200)</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Endereço completo.</td></tr>
+          <tr><td><code>nr_telefone</code></td><td>VARCHAR(20)</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Telefone de contato (obrigatório para as compras, P8).</td></tr>
         </table>
-        <p><strong>Índices:</strong> PK(id_fornecedor); UNIQUE(nr_cnpj), que impede fornecedor duplicado e acelera a busca por CNPJ.</p>
+        </div>
+        <p><strong>Índices:</strong> PK(id_fornecedor); UNIQUE(nr_cnpj) (RN02).</p>
       </section>
  
       <section class="entity">
-        <h3>08. Compra</h3>
-        <p>Representa as compras realizadas junto aos fornecedores.</p>
+        <h3>03. Marca</h3>
+        <p>Marcas comerciais da empresa (Tutti Capelli e Outlet Hair). Nova na versão 2.0 do modelo lógico.</p>
+        <div class="formal">MARCA = @id_marca + nm_marca</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_marca</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único da marca.</td></tr>
+          <tr><td><code>nm_marca</code></td><td>VARCHAR(60)</td><td>—</td><td>Sim</td><td>Sim</td><td>—</td><td>—</td><td>Nome comercial da marca (Tutti Capelli, Outlet Hair).</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK(id_marca); UNIQUE(nm_marca), para não cadastrar a mesma marca duas vezes.</p>
+      </section>
+ 
+      <section class="entity">
+        <h3>04. Funcionário</h3>
+        <p>Equipe interna (9 pessoas) que registra pedidos e opera o sistema. Nova na versão 2.0.</p>
+        <div class="formal">FUNCIONARIO = @id_funcionario + nm_funcionario + ds_cargo</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_funcionario</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único do funcionário.</td></tr>
+          <tr><td><code>nm_funcionario</code></td><td>VARCHAR(120)</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Nome completo.</td></tr>
+          <tr><td><code>ds_cargo</code></td><td>VARCHAR(60)</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Cargo (ex.: vendedor interno, gerente financeira, estoquista). Lista aberta.</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK(id_funcionario), destino da FK de pedido.</p>
+      </section>
+ 
+      <section class="entity">
+        <h3>05. Produto</h3>
+        <p>Catálogo de produtos (99 itens).</p>
+        <div class="formal">PRODUTO = @id_produto + nm_produto + tp_produto + vl_preco + qt_estoque_minimo + id_marca → MARCA</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único do produto.</td></tr>
+          <tr><td><code>nm_produto</code></td><td>VARCHAR(120)</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Nome comercial, sem a marca (a marca fica em id_marca).</td></tr>
+          <tr><td><code>tp_produto</code></td><td>VARCHAR(50)</td><td>—</td><td>Sim</td><td>Não</td><td>Lista aberta (shampoo, condicionador, máscara, óleo, perfume capilar, ox, coloração, pó descolorante…)</td><td>—</td><td>Tipo do produto; novos tipos são cadastrados sem alterar a tabela.</td></tr>
+          <tr><td><code>vl_preco</code></td><td>DECIMAL(10,2)</td><td>—</td><td>Sim</td><td>Não</td><td>&gt; 0 (CHECK)</td><td>—</td><td>Preço de venda vigente. O preço de cada venda fica em pedido_produto.vl_preco_praticado (RN05).</td></tr>
+          <tr><td><code>qt_estoque_minimo</code></td><td>INTEGER</td><td>—</td><td>Sim</td><td>Não</td><td>&gt;= 0 (CHECK) — RN12</td><td>0</td><td>Estoque mínimo; abaixo ou igual a ele o produto entra na lista de reposição.</td></tr>
+          <tr><td><code>id_marca</code></td><td>INTEGER</td><td>FK → marca</td><td>Sim</td><td>Não</td><td>Deve existir em marca</td><td>—</td><td>Marca do produto (P13).</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK(id_produto); índice em id_marca (FK), para os relatórios por marca.</p>
+      </section>
+ 
+      <section class="entity">
+        <h3>06. Pedido</h3>
+        <p>Pedido de um distribuidor, registrado por um funcionário.</p>
+        <div class="formal">PEDIDO = @id_pedido + dt_pedido + st_pedido + id_distribuidor → DISTRIBUIDOR + id_funcionario → FUNCIONARIO
+st_pedido = [pendente | liberado | entregue | cancelado]</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único do pedido.</td></tr>
+          <tr><td><code>dt_pedido</code></td><td>DATE</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Data de registro do pedido.</td></tr>
+          <tr><td><code>st_pedido</code></td><td>VARCHAR(20)</td><td>—</td><td>Sim</td><td>Não</td><td>pendente | liberado | entregue | cancelado (CHECK) — RN07, RN26</td><td>&#x27;pendente&#x27;</td><td>Situação. Pedido não é apagado: o cancelamento fica no histórico (triggers).</td></tr>
+          <tr><td><code>id_distribuidor</code></td><td>INTEGER</td><td>FK → distribuidor</td><td>Sim</td><td>Não</td><td>Deve existir em distribuidor — RN01</td><td>—</td><td>Distribuidor que fez o pedido.</td></tr>
+          <tr><td><code>id_funcionario</code></td><td>INTEGER</td><td>FK → funcionario</td><td>Sim</td><td>Não</td><td>Deve existir em funcionario</td><td>—</td><td>Funcionário que registrou o pedido (vendas por funcionário, P13).</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK(id_pedido); índices em id_distribuidor, id_funcionario (FKs), st_pedido e dt_pedido (filtros por situação e período).</p>
+      </section>
+ 
+      <section class="entity">
+        <h3>07. Pedido_Produto (entidade associativa)</h3>
+        <p>Itens do pedido: resolve o N:N entre pedido e produto.</p>
+        <div class="formal">PEDIDO_PRODUTO = @(id_pedido → PEDIDO + id_produto → PRODUTO) + qt_solicitada + vl_preco_praticado</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>PK, FK → pedido</td><td>Sim</td><td>Sim (composta)</td><td>Deve existir em pedido</td><td>—</td><td>Pedido que contém o item (parte da PK composta).</td></tr>
+          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>PK, FK → produto</td><td>Sim</td><td>Sim (composta)</td><td>Deve existir em produto</td><td>—</td><td>Produto do item (parte da PK composta).</td></tr>
+          <tr><td><code>qt_solicitada</code></td><td>INTEGER</td><td>—</td><td>Sim</td><td>Não</td><td>&gt; 0 (CHECK); &lt;= estoque válido no registro (trigger) — RN03, RN10</td><td>—</td><td>Quantidade do produto no pedido.</td></tr>
+          <tr><td><code>vl_preco_praticado</code></td><td>DECIMAL(10,2)</td><td>—</td><td>Sim</td><td>Não</td><td>&gt; 0 (CHECK) — RN05</td><td>—</td><td>Preço unitário vigente na data do pedido.</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK composta (id_pedido, id_produto), que impede o mesmo produto repetido no pedido; índice em id_produto, para &quot;em quais pedidos o produto aparece&quot;.</p>
+      </section>
+ 
+      <section class="entity">
+        <h3>08. Nota Fiscal</h3>
+        <p>Nota fiscal de venda; uma por pedido, guardada por 5 anos (RN23).</p>
+        <div class="formal">NOTA_FISCAL = @id_nf + nr_nf + dt_emissao + vl_nf + id_pedido → PEDIDO</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_nf</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único da nota.</td></tr>
+          <tr><td><code>nr_nf</code></td><td>VARCHAR(20)</td><td>—</td><td>Sim</td><td>Sim</td><td>—</td><td>—</td><td>Número oficial da nota fiscal.</td></tr>
+          <tr><td><code>dt_emissao</code></td><td>DATE</td><td>—</td><td>Sim</td><td>Não</td><td>Não anterior à data do pedido (auditoria A14) — RN08</td><td>—</td><td>Data de emissão.</td></tr>
+          <tr><td><code>vl_nf</code></td><td>DECIMAL(10,2)</td><td>—</td><td>Sim</td><td>Não</td><td>&gt; 0 (CHECK); igual ao total do pedido (auditoria A03) — RN09</td><td>—</td><td>Valor total faturado.</td></tr>
+          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>FK → pedido</td><td>Sim</td><td>Sim</td><td>Deve existir em pedido; pedido não cancelado (trigger) — RN09, RN26</td><td>—</td><td>Pedido faturado (no máximo uma nota por pedido).</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK(id_nf); UNIQUE(nr_nf); UNIQUE(id_pedido), que implementa o máximo 1 da cardinalidade (0,1).</p>
+      </section>
+ 
+      <section class="entity">
+        <h3>09. Pagamento</h3>
+        <p>Ficha de pagamento: recebimentos de cada pedido (pode haver vários).</p>
+        <div class="formal">PAGAMENTO = @id_pagamento + dt_pagamento + vl_pagamento + tp_forma_pagamento + id_pedido → PEDIDO
+tp_forma_pagamento = [cartao | boleto | pix | cheque | transferencia | dinheiro]</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_pagamento</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único do pagamento.</td></tr>
+          <tr><td><code>dt_pagamento</code></td><td>DATE</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Data do recebimento.</td></tr>
+          <tr><td><code>vl_pagamento</code></td><td>DECIMAL(10,2)</td><td>—</td><td>Sim</td><td>Não</td><td>&gt; 0 (CHECK)</td><td>—</td><td>Valor recebido.</td></tr>
+          <tr><td><code>tp_forma_pagamento</code></td><td>VARCHAR(30)</td><td>—</td><td>Sim</td><td>Não</td><td>cartao | boleto | pix | cheque | transferencia | dinheiro (CHECK)</td><td>—</td><td>Forma de pagamento.</td></tr>
+          <tr><td><code>id_pedido</code></td><td>INTEGER</td><td>FK → pedido</td><td>Sim</td><td>Não</td><td>Deve existir em pedido; pedido não cancelado (trigger) — RN07, RN26</td><td>—</td><td>Pedido ao qual o pagamento se refere.</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK(id_pagamento); índices em id_pedido e dt_pagamento.</p>
+      </section>
+ 
+      <section class="entity">
+        <h3>10. Compra</h3>
+        <p>Compra feita a uma fábrica.</p>
         <div class="formal">COMPRA = @id_compra + dt_compra + vl_compra + id_fornecedor → FORNECEDOR</div>
+        <div class="scroll">
         <table>
-          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
-          <tr><td><code>id_compra</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único da compra.</td></tr>
-          <tr><td><code>dt_compra</code></td><td>DATE</td><td>Sim</td><td>Data da compra.</td></tr>
-          <tr><td><code>vl_compra</code></td><td>DECIMAL(10,2)</td><td>Sim</td><td>Valor total (maior que zero).</td></tr>
-          <tr><td><code>id_fornecedor</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Fornecedor responsável.</td></tr>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_compra</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único da compra.</td></tr>
+          <tr><td><code>dt_compra</code></td><td>DATE</td><td>—</td><td>Sim</td><td>Não</td><td>—</td><td>—</td><td>Data da compra à fábrica.</td></tr>
+          <tr><td><code>vl_compra</code></td><td>DECIMAL(10,2)</td><td>—</td><td>Sim</td><td>Não</td><td>&gt; 0 (CHECK)</td><td>—</td><td>Valor total da compra.</td></tr>
+          <tr><td><code>id_fornecedor</code></td><td>INTEGER</td><td>FK → fornecedor</td><td>Sim</td><td>Não</td><td>Deve existir em fornecedor — RN17</td><td>—</td><td>Fábrica que recebeu a compra.</td></tr>
         </table>
-        <p><strong>Índices:</strong> PK(id_compra), destino da FK de lote; índice em id_fornecedor, para listar as compras de cada fornecedor e acelerar o join.</p>
+        </div>
+        <p><strong>Índices:</strong> PK(id_compra); índice em id_fornecedor.</p>
       </section>
  
       <section class="entity">
-        <h3>09. Lote</h3>
-        <p>Controla os lotes recebidos no estoque e sua rastreabilidade.</p>
-        <div class="formal">LOTE = @id_lote + id_compra → COMPRA + id_produto → PRODUTO + qt_lote + dt_validade</div>
+        <h3>11. Pagamento de Compra</h3>
+        <p>Contas a pagar às fábricas: parcelas de cada compra (P11). Nova na versão 2.0.</p>
+        <div class="formal">PAGAMENTO_COMPRA = @id_pagamento_compra + dt_vencimento + vl_parcela + (dt_pagamento + tp_forma_pagamento) + id_compra → COMPRA
+tp_forma_pagamento = [boleto | pix | transferencia]</div>
+        <div class="scroll">
         <table>
-          <tr><th>Atributo</th><th>Tipo físico</th><th>Obrigatório</th><th>Significado e relevância</th></tr>
-          <tr><td><code>id_lote</code></td><td>INTEGER</td><td>Sim (PK)</td><td>Identificador único do lote.</td></tr>
-          <tr><td><code>id_compra</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Compra de origem.</td></tr>
-          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>Sim (FK)</td><td>Produto armazenado.</td></tr>
-          <tr><td><code>qt_lote</code></td><td>INTEGER</td><td>Sim</td><td>Saldo atual do lote (maior ou igual a zero). Começa com a quantidade recebida e diminui a cada entrega, do lote de validade mais próxima (FEFO, RN11). A quantidade original recebida não é guardada.</td></tr>
-          <tr><td><code>dt_validade</code></td><td>DATE</td><td>Sim</td><td>Data de validade do lote (igual ou posterior à data da compra).</td></tr>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_pagamento_compra</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único da parcela.</td></tr>
+          <tr><td><code>dt_vencimento</code></td><td>DATE</td><td>—</td><td>Sim</td><td>Não</td><td>Não anterior à data da compra (auditoria A21) — RN20</td><td>—</td><td>Vencimento da parcela.</td></tr>
+          <tr><td><code>vl_parcela</code></td><td>DECIMAL(10,2)</td><td>—</td><td>Sim</td><td>Não</td><td>&gt; 0 (CHECK); soma das parcelas = valor da compra (auditoria A20) — RN20</td><td>—</td><td>Valor da parcela.</td></tr>
+          <tr><td><code>dt_pagamento</code></td><td>DATE</td><td>—</td><td>Não</td><td>Não</td><td>NULL = em aberto; preenchida junto com a forma (CHECK)</td><td>—</td><td>Data em que a parcela foi paga.</td></tr>
+          <tr><td><code>tp_forma_pagamento</code></td><td>VARCHAR(30)</td><td>—</td><td>Não</td><td>Não</td><td>boleto | pix | transferencia (CHECK); só preenchida se paga</td><td>—</td><td>Forma de pagamento à fábrica.</td></tr>
+          <tr><td><code>id_compra</code></td><td>INTEGER</td><td>FK → compra</td><td>Sim</td><td>Não</td><td>Deve existir em compra — RN20</td><td>—</td><td>Compra que gerou a parcela.</td></tr>
         </table>
-        <p><strong>Índices:</strong> PK(id_lote); índice em id_compra, para rastrear os lotes de uma compra; índice em id_produto, para somar o estoque disponível de um produto na verificação de disponibilidade do pedido; índice em dt_validade, base do relatório e do alerta de vencimento.</p>
+        </div>
+        <p><strong>Índices:</strong> PK(id_pagamento_compra); índices em id_compra e dt_vencimento (consulta de parcelas a vencer).</p>
       </section>
  
-      <!-- 6 -->
+      <section class="entity">
+        <h3>12. Lote</h3>
+        <p>Lote recebido de uma compra, com saldo e validade.</p>
+        <div class="formal">LOTE = @id_lote + id_compra → COMPRA + id_produto → PRODUTO + qt_lote + dt_validade</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_lote</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único do lote.</td></tr>
+          <tr><td><code>id_compra</code></td><td>INTEGER</td><td>FK → compra</td><td>Sim</td><td>Não</td><td>Deve existir em compra — RN19</td><td>—</td><td>Compra de origem do lote.</td></tr>
+          <tr><td><code>id_produto</code></td><td>INTEGER</td><td>FK → produto</td><td>Sim</td><td>Não</td><td>Deve existir em produto — RN19</td><td>—</td><td>Produto do lote.</td></tr>
+          <tr><td><code>qt_lote</code></td><td>INTEGER</td><td>—</td><td>Sim</td><td>Não</td><td>&gt;= 0 (CHECK)</td><td>—</td><td>Saldo atual do lote; diminui na entrega pelo FEFO (RN11).</td></tr>
+          <tr><td><code>dt_validade</code></td><td>DATE</td><td>—</td><td>Sim</td><td>Não</td><td>Não anterior à data da compra (trigger) — RN19</td><td>—</td><td>Validade do lote; vencido não é vendido (RN10).</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK(id_lote); índices em id_compra, id_produto e dt_validade (relatório de validade e FEFO).</p>
+      </section>
+ 
+      <section class="entity">
+        <h3>13. Devolução</h3>
+        <p>Devoluções e trocas pedidas pelos distribuidores (P7). Nova na versão 2.0.</p>
+        <div class="formal">DEVOLUCAO = @id_devolucao + dt_devolucao + qt_devolvida + tp_motivo + st_devolucao + (tp_resolucao) + id_nf → NOTA_FISCAL + id_lote → LOTE
+tp_motivo = [avaria | vencido | divergente]
+st_devolucao = [em_analise | aceita | recusada]
+tp_resolucao = [troca | credito | estorno]</div>
+        <div class="scroll">
+        <table>
+          <tr><th>Atributo</th><th>Tipo</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos / regra</th><th>Padrão</th><th>Significado</th></tr>
+          <tr><td><code>id_devolucao</code></td><td>INTEGER</td><td>PK</td><td>Sim</td><td>Sim</td><td>—</td><td>AUTO_INCREMENT</td><td>Identificador único da devolução.</td></tr>
+          <tr><td><code>dt_devolucao</code></td><td>DATE</td><td>—</td><td>Sim</td><td>Não</td><td>Até 30 dias após a nota para ser aceita (auditoria A17) — RN14</td><td>—</td><td>Data da solicitação do distribuidor.</td></tr>
+          <tr><td><code>qt_devolvida</code></td><td>INTEGER</td><td>—</td><td>Sim</td><td>Não</td><td>&gt; 0 (CHECK); &lt;= quantidade vendida (auditoria A18) — RN15</td><td>—</td><td>Quantidade devolvida.</td></tr>
+          <tr><td><code>tp_motivo</code></td><td>VARCHAR(20)</td><td>—</td><td>Sim</td><td>Não</td><td>avaria | vencido | divergente (CHECK) — RN14</td><td>—</td><td>Motivo da devolução.</td></tr>
+          <tr><td><code>st_devolucao</code></td><td>VARCHAR(20)</td><td>—</td><td>Sim</td><td>Não</td><td>em_analise | aceita | recusada (CHECK)</td><td>&#x27;em_analise&#x27;</td><td>Situação da análise.</td></tr>
+          <tr><td><code>tp_resolucao</code></td><td>VARCHAR(20)</td><td>—</td><td>Não</td><td>Não</td><td>troca | credito | estorno, obrigatória só quando aceita (CHECK) — RN16</td><td>—</td><td>Decisão do gerente.</td></tr>
+          <tr><td><code>id_nf</code></td><td>INTEGER</td><td>FK → nota_fiscal</td><td>Sim</td><td>Não</td><td>Deve existir em nota_fiscal — RN15</td><td>—</td><td>Nota fiscal de origem.</td></tr>
+          <tr><td><code>id_lote</code></td><td>INTEGER</td><td>FK → lote</td><td>Sim</td><td>Não</td><td>Deve existir em lote; produto do pedido da nota (auditoria A18) — RN15</td><td>—</td><td>Lote de origem do produto devolvido.</td></tr>
+        </table>
+        </div>
+        <p><strong>Índices:</strong> PK(id_devolucao); índices em id_nf e id_lote.</p>
+      </section>
+ 
       <section class="section">
-        <h2>6. Log de Acesso (Metadado Operacional)</h2>
-        <p>
-          As tabelas do sistema utilizam o mecanismo de auditoria do MySQL 8 por meio do <code>audit_log</code>, registrando operações
-          de leitura, inserção, atualização e exclusão.
-        </p>
-        <p>
-          Os registros são utilizados para rastreabilidade das operações administrativas, financeiras e de estoque, permitindo auditoria
-          das alterações realizadas no banco.
-        </p>
+        <h2>6. Rastreabilidade e Auditoria</h2>
+        <p><strong>O que está implementado no script</strong> (<code>Docs/script.sql</code>):</p>
+        <ul>
+          <li><strong>Histórico preservado:</strong> nota fiscal, pedido, compra, lote e devolução não são apagados quando têm vínculos (<code>ON DELETE RESTRICT</code>), e o pedido nunca é apagado: o cancelamento fica registrado na situação "cancelado" (trigger <code>trg_pedido_bd</code>, RN26).</li>
+          <li><strong>Bloqueio de operações inválidas:</strong> triggers recusam CNPJ inválido (RN02), venda acima do estoque válido (RN03/RN10), lote com validade anterior à compra (RN19), cancelamento de pedido já liberado ou entregue e nota ou pagamento para pedido cancelado (RN26).</li>
+          <li><strong>Consultas de auditoria A01 a A21:</strong> conferem periodicamente a consistência dos dados e o cumprimento das regras de negócio (ex.: nota igual ao total do pedido, pagamento acima do total, devolução fora do prazo, parcelas iguais ao valor da compra). A16 resume todas em uma única consulta.</li>
+        </ul>
+        <div class="note">
+          <strong>Proposta futura (não implementada):</strong> registrar <em>quem</em> fez cada operação e <em>quando</em>. O plugin <code>audit_log</code> só existe no MySQL Enterprise
+          e não está disponível no MySQL Community usado no projeto. A alternativa seria uma tabela <code>log_operacao</code> (usuário, data e hora, tabela, operação,
+          chave do registro) preenchida por triggers <code>AFTER INSERT/UPDATE/DELETE</code>, com acesso restrito à gerência e retenção de 12 meses.
+        </div>
       </section>
  
       <!-- 7 -->
@@ -367,13 +494,17 @@ tp_forma_pagamento = [cartão | boleto | pix | cheque | transferência bancária
           <tr><th>Tabela</th><th>Ler</th><th>Inserir</th><th>Atualizar</th><th>Apagar</th></tr>
           <tr><td>distribuidor</td><td>Comercial</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
           <tr><td>produto</td><td>Comercial/Estoque</td><td>Administrativo</td><td>Administrativo</td><td>Administrativo</td></tr>
-          <tr><td>pedido</td><td>Comercial/Financeiro/Fiscal/Estoque</td><td>Comercial</td><td>Comercial/Financeiro/Estoque</td><td>Administrativo</td></tr>
+          <tr><td>pedido</td><td>Comercial/Financeiro/Fiscal/Estoque</td><td>Comercial</td><td>Comercial/Financeiro/Estoque</td><td>Nenhum (RN26: cancela, não apaga)</td></tr>
           <tr><td>pedido_produto</td><td>Comercial/Fiscal/Estoque</td><td>Comercial</td><td>Comercial</td><td>Administrativo</td></tr>
           <tr><td>nota_fiscal</td><td>Fiscal</td><td>Fiscal</td><td>Nenhum</td><td>Nenhum</td></tr>
           <tr><td>pagamento</td><td>Financeiro</td><td>Financeiro</td><td>Financeiro</td><td>Administrativo</td></tr>
           <tr><td>fornecedor</td><td>Compras</td><td>Compras</td><td>Compras</td><td>Administrativo</td></tr>
           <tr><td>compra</td><td>Compras</td><td>Compras</td><td>Compras</td><td>Administrativo</td></tr>
           <tr><td>lote</td><td>Estoque/Comercial</td><td>Estoque</td><td>Estoque</td><td>Administrativo</td></tr>
+          <tr><td>marca</td><td>Todos</td><td>Administrativo</td><td>Administrativo</td><td>Administrativo</td></tr>
+          <tr><td>funcionario</td><td>Gerência/Administrativo</td><td>Gerência</td><td>Gerência</td><td>Nenhum (histórico dos pedidos)</td></tr>
+          <tr><td>pagamento_compra</td><td>Financeiro/Compras</td><td>Financeiro</td><td>Financeiro</td><td>Nenhum</td></tr>
+          <tr><td>devolucao</td><td>Comercial/Estoque/Gerência</td><td>Comercial</td><td>Gerência (decisão)</td><td>Nenhum</td></tr>
         </table>
         <p>O Financeiro atualiza o pedido ao liberá-lo (status "liberado") e o Estoque ao entregá-lo (status "entregue"); a leitura é ampliada para quem precisa consultar o pedido, os itens e o saldo dos lotes. Este modelo segue as práticas de rastreabilidade e controle de acesso apresentadas no exemplo utilizado como referência, adaptadas ao contexto comercial da Unileste Comércio LTDA.</p>
       </section>
@@ -397,8 +528,10 @@ tp_forma_pagamento = [cartão | boleto | pix | cheque | transferência bancária
           <tr><td>pedido, pedido_produto</td><td>Transacional (vinculado ao distribuidor)</td><td>Não</td><td>V – execução de contrato</td><td>5 anos</td></tr>
           <tr><td>nota_fiscal</td><td>Fiscal</td><td>Não</td><td>II – cumprimento de obrigação legal ou regulatória</td><td>5 anos (prazo tributário); sem exclusão pelo sistema</td></tr>
           <tr><td>pagamento, compra</td><td>Financeiro</td><td>Não</td><td>V – execução de contrato; II – obrigação legal (registros contábeis e fiscais)</td><td>5 anos</td></tr>
-          <tr><td>produto, lote</td><td>Não pessoal</td><td>Não</td><td>Fora do escopo da LGPD</td><td>Operacional; manter para rastreabilidade de validade</td></tr>
-          <tr><td>audit_log</td><td>Registro de acessos dos usuários internos</td><td>Não</td><td>IX – legítimo interesse (segurança e prevenção a fraudes; art. 46)</td><td>12 meses</td></tr>
+          <tr><td>funcionario (nm_funcionario, ds_cargo)</td><td>Pessoal comum (pessoa natural: empregado)</td><td>Não</td><td>V – execução do contrato de trabalho; IX – legítimo interesse (registro de quem fez cada pedido)</td><td>Durante o vínculo + 5 anos (histórico dos pedidos)</td></tr>
+          <tr><td>pagamento_compra, devolucao</td><td>Financeiro / transacional</td><td>Não</td><td>V – execução de contrato; II – obrigação legal</td><td>5 anos</td></tr>
+          <tr><td>produto, lote, marca</td><td>Não pessoal</td><td>Não</td><td>Fora do escopo da LGPD</td><td>Operacional; manter para rastreabilidade de validade</td></tr>
+          <tr><td>log_operacao (proposta futura, seção 6)</td><td>Registro de operações dos usuários internos</td><td>Não</td><td>IX – legítimo interesse (segurança e prevenção a fraudes; art. 46)</td><td>12 meses</td></tr>
         </table>
         </div>
         <h3>8.2 Retenção, eliminação e direitos</h3>
@@ -406,7 +539,7 @@ tp_forma_pagamento = [cartão | boleto | pix | cheque | transferência bancária
           Terminada a finalidade e vencido o prazo de retenção, os dados cadastrais deixam de ser mantidos (eliminação ou anonimização, arts. 15 e 16). A
           exceção é a guarda exigida por obrigação legal (art. 16, I), caso das notas fiscais e dos registros financeiros, que são conservados
           pelo prazo tributário e depois descartados. Seguem-se os princípios de <strong>minimização</strong> (só se coleta o necessário ao processo, por isso telefone do distribuidor é opcional, art. 6º, III)
-          e de <strong>segurança</strong> (controle de acesso por perfil na seção 7 e auditoria na seção 6). O titular pode exercer os direitos do art. 18
+          e de <strong>segurança</strong> (controle de acesso por perfil na seção 7, triggers e consultas de auditoria na seção 6). O titular pode exercer os direitos do art. 18
           (confirmação, acesso, correção, eliminação quando cabível) por solicitação à empresa.
         </p>
         <div class="note">Bases legais e prazos são <strong>propostas do grupo</strong> para o modelo acadêmico e devem ser confirmados com o contador e o jurídico da Unileste antes de uso real.</div>
