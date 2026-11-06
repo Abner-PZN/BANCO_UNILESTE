@@ -1,6 +1,5 @@
--- UNILESTE — SCRIPT 2 de 2: massa de dados (INSERTs) + objetos pós-carga + SELECT/UPDATE/DELETE + consultas.
+-- SCRIPT 2 de 2: massa de dados (INSERTs) + objetos pós-carga + SELECT/UPDATE/DELETE + consultas.
 -- Execute DEPOIS de 01_estrutura.sql.
-USE unileste;
 
 -- =====================================================================
 -- 4. INSERT INTO — massa de dados FICTÍCIA
